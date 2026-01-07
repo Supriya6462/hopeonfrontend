@@ -5,11 +5,11 @@ import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/routes/routes";
 
 /**
- * DonorLayout - Main layout wrapper for donor/public pages
+ * PublicLayout - Layout for public pages (accessible without login)
  * Features: NavigationBar (top) + Content (middle) + Footer (bottom)
- * Includes RoleProvider for context switching (organizers can switch views)
+ * Shows login/register buttons when not logged in, profile/logout when logged in
  */
-export default function DonorLayout() {
+export default function PublicLayout() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 

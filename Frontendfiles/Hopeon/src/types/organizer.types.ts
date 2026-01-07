@@ -10,6 +10,15 @@ export interface SubmitApplicationDTO {
   documents?: any;
 }
 
+export interface OrganizerDocuments {
+  governmentId: File | null;
+  selfieWithId: File | null;
+  registrationCertificate?: File | null;
+  taxId?: File | null;
+  addressProof?: File | null;
+  additionalDocuments?: File[];
+}
+
 export interface ApplicationFilters {
   status?: ApplicationStatus;
   page?: number;

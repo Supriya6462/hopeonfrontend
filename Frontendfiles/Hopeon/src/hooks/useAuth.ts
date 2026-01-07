@@ -105,6 +105,8 @@ export const useLogin = () => {
       try {
         localStorage.setItem("authToken", data.data.token);
         localStorage.setItem("user", JSON.stringify(data.data.user));
+        // Dispatch custom event to notify AuthContext of the change
+        window.dispatchEvent(new Event("auth-change"));
       } catch (error) {
         console.error("Failed to store auth data:", error);
       }
@@ -121,7 +123,7 @@ export const useLogin = () => {
           break;
         case "donor":
         default:
-          navigate(ROUTES.DonorHomepage, { replace: true });
+          navigate(ROUTES.HOME, { replace: true });
           break;
       }
     },

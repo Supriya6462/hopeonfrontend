@@ -12,7 +12,7 @@ interface AuthLayoutProps {
  */
 export const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-indigo-50 flex">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-emerald-50 via-blue-50 to-indigo-50 flex">
       {/* Left Side - Hero Section */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/90 via-blue-600/90 to-indigo-600/90 z-10"></div>

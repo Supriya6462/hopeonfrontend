@@ -28,51 +28,65 @@ import OrganizerDashboard from "@/features/organizer/pages/Dashboard";
 import AdminDashboard from "@/features/admin/pages/Dashboard";
 
 import { ROUTES } from "./routes";
-import { DonorAboutus, DonorHomepage } from "@/features/donor/pages";
+import { ApplyOrganizer, DonorAboutus, DonorHomepage } from "@/features/donor/pages";
+import { PublicLayout } from "@/layouts";
 
 /**
  * Application Routes Configuration
  * Organized by: Public routes, Protected routes (by role), and Fallback
  */
 const routesConfig: RouteObject[] = [
-  // ==================== Public Routes ====================
+  // ==================== Public Routes (with layout) ====================
   {
-    path: ROUTES.HOME,
-    element: <Navigate to={ROUTES.LOGIN} replace />,
-  },
-
-  //publicroute pages
-  {
-    path: ROUTES.LOGIN,
-    element: (
-      <PublicRoute>
-        <Login />
-      </PublicRoute>
-    ),
-  },
-  {
-    path: ROUTES.REGISTER,
-    element: (
-      <PublicRoute>
-        <Register />
-      </PublicRoute>
-    ),
-  },
-  {
-    path: ROUTES.FORGOT_PASSWORD,
-    element: (
-      <PublicRoute>
-        <ForgetPassword />
-      </PublicRoute>
-    ),
-  },
-  {
-    path: ROUTES.OTP_VERIFICATION,
-    element: <VerifyOtp />,
-  },
-  {
-    path: ROUTES.RESET_PASSWORD,
-    element: <ResetPassword />,
+    path: "/",
+    element: <PublicLayout />,
+    children: [
+      {
+        index: true,
+        element: <DonorHomepage />,
+      },
+      {
+        path: "homepage",
+        element: <DonorHomepage />,
+      },
+      {
+        path: "aboutus",
+        element: <DonorAboutus />,
+      },
+      // Auth pages inside PublicLayout
+      {
+        path: "login",
+        element: (
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        ),
+      },
+      {
+        path: "register",
+        element: (
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        ),
+      },
+      {
+        path: "forgot-password",
+        element: (
+          <PublicRoute>
+            <ForgetPassword />
+          </PublicRoute>
+        ),
+      },
+      {
+        path: "verify-otp",
+        element: <VerifyOtp />,
+      },
+      {
+        path: "reset-password",
+        element: <ResetPassword />,
+      },
+    ],
   },
 
   // ==================== Donor Routes ====================
@@ -90,12 +104,11 @@ const routesConfig: RouteObject[] = [
       },
       {
         path: "homepage",
-        element: <DonorHomepage />
+        element: <DonorHomepage />,
       },
-
       {
         path: "aboutus",
-        element: <DonorAboutus />
+        element: <DonorAboutus />,
       },
       {
         path: "dashboard",
@@ -109,6 +122,10 @@ const routesConfig: RouteObject[] = [
         path: "profile",
         element: <DonorProfile />,
       },
+      {
+        path: "apply-organizer",
+        element: <ApplyOrganizer />,
+      }
     ],
   },
 

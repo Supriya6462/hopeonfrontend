@@ -67,6 +67,7 @@ export const publicCampaignAPI = {
     isClosed?: boolean;
   }) => {
     const response = await api.get("/api/campaigns", { params });
+
     return response.data;
   },
 

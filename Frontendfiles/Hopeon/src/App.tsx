@@ -1,5 +1,6 @@
 import AppRouter from "@/app/router/AppRouter";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/context/AuthContext";
 
 /**
  * Main App Component
@@ -7,10 +8,10 @@ import { Toaster } from "@/components/ui/sonner";
  */
 const App = () => {
   return (
-    <>
+    <AuthProvider>
       <AppRouter />
       <Toaster />
-    </>
+    </AuthProvider>
   );
 };
 

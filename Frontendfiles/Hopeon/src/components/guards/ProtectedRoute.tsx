@@ -41,7 +41,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
             return <Navigate to={ROUTES.ORGANIZER_DASHBOARD} replace />;
           case "donor":
           default:
-            return <Navigate to={ROUTES.DONOR_DASHBOARD} replace />;
+            return <Navigate to={ROUTES.HOME} replace />;
         }
       }
     }

@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Shield, ArrowRight, ArrowLeft, Mail } from "lucide-react";
+import { ArrowRight, ArrowLeft, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useEffect, useState } from "react";

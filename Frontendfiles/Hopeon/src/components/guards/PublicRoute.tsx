@@ -35,8 +35,8 @@ export default function PublicRoute({children}: PublicRouteProps){
             case "organizer":
                 return <Navigate to={ROUTES.ORGANIZER_DASHBOARD} replace />
             case "donor":
-                default:
-                return <Navigate to={ROUTES.DONOR_DASHBOARD} replace />
+            default:
+                return <Navigate to={ROUTES.HOME} replace />
           
         }
     } catch {

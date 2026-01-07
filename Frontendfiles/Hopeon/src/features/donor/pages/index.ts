@@ -4,3 +4,4 @@ export { default as DonorProfile } from "./Profile";
 export { default as DonorHomepage } from "./Homepage";
 export { default as DonorAboutus } from "./Aboutus";
 export { default as DonorDonate } from "./Donate";
+export { default as ApplyOrganizer} from "./Applyfororganizer";

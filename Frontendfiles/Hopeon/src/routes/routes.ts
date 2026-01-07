@@ -1,5 +1,3 @@
-import { DonorAboutus, DonorHomepage } from "@/features/donor/pages";
-
 /**
  * Application Routes Configuration
  * Centralized route paths for the application
@@ -14,15 +12,18 @@ export const ROUTES = {
 
   // Public Routes
   HOME: "/",
+  HOMEPAGE: "/homepage",
+  ABOUTUS: "/aboutus",
   CAMPAIGNS: "/campaigns",
   CAMPAIGN_DETAILS: "/campaigns/:id",
 
-  // Donor Routes
+  // Donor Routes (Protected)
   DonorHomepage:"/donor/homepage",
   DonorAboutus:"/donor/aboutus",
   DONOR_DASHBOARD: "/donor/dashboard",
   DONOR_DONATIONS: "/donor/donations",
   DONOR_PROFILE: "/donor/profile",
+  APPLY_ORGANIZER: "/donor/apply-organizer",
 
   // Organizer Routes
   ORGANIZER_DASHBOARD: "/organizer/dashboard",
@@ -31,6 +32,7 @@ export const ROUTES = {
   ORGANIZER_EDIT_CAMPAIGN: "/organizer/campaigns/:id/edit",
   ORGANIZER_WITHDRAWALS: "/organizer/withdrawals",
   ORGANIZER_PROFILE: "/organizer/profile",
+ 
 
   // Admin Routes
   ADMIN_DASHBOARD: "/admin/dashboard",

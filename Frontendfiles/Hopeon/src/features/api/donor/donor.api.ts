@@ -26,15 +26,24 @@ export const donorDonationAPI = {
 // ==================== Organizer Application APIs (Donor) ====================
 
 export const donorOrganizerAPI = {
+   
   // Submit organizer application
   applyAsOrganizer: async (data: FormData) => {
-    const response = await api.post("/api/organizer/apply", data, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await api.post("/api/organizer/apply", data);
     return response.data;
   },
+
+  OrganizerApplicationDraft: async (data: FormData) => {
+    const response = await api.post("/api/organizer/apply/draft", data);
+    return response.data;
+
+  },
+
+  OrganizerDocument: async (applicationId:string,data: FormData) => {
+    const response = await api.post(`/api/organizer/apply/${applicationId}`,data);
+    return response.data;
+  },
+
 
   // Get user's organizer applications
   getMyApplications: async () => {
