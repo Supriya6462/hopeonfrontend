@@ -41,6 +41,8 @@ export const ROUTES = {
   ADMIN_ORGANIZERS: "/admin/organizers",
   ADMIN_DONATIONS: "/admin/donations",
   ADMIN_WITHDRAWALS: "/admin/withdrawals",
+  ADMIN_APPLICATIONS:"/admin/applications",
+  ADMIN_ORGANIZER_MANAGEMENT:"/admin/organizermanagement",
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

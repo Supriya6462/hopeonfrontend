@@ -11,6 +11,7 @@ interface ProtectedRouteProps {
  * ProtectedRoute - Guards routes that require authentication
  * Optionally restricts access based on user roles
  * Note: Admin role has access to all protected routes
+ * Note: Organizers can access both donor and organizer routes
  */
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const location = useLocation();
@@ -30,6 +31,13 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     // Admin has access to everything
     if (userRole === "admin") {
       return <>{children}</>;
+    }
+
+    // Organizers can access both donor and organizer routes
+    if (userRole === "organizer") {
+      if (allowedRoles && (allowedRoles.includes("donor") || allowedRoles.includes("organizer"))) {
+        return <>{children}</>;
+      }
     }
 
     // If allowedRoles specified, check if user has permission

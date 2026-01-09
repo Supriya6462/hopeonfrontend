@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 
 export type UserRole = "donor" | "organizer" | "admin";
 export type ViewContext = "donor" | "organizer";
@@ -19,21 +20,41 @@ interface RoleProviderProps {
 /**
  * RoleProvider - Manages the active view context for users who can switch roles
  * Organizers can switch between donor and organizer views
+ * Syncs activeView with URL path to maintain consistency on refresh
  */
 export function RoleProvider({ children, userRole }: RoleProviderProps) {
+  const location = useLocation();
   const canSwitchRole = userRole === "organizer";
   
   const [activeView, setActiveView] = useState<ViewContext>(() => {
-    // Initialize from localStorage if available
+    // Determine initial view from URL path
+    if (location.pathname.startsWith("/organizer")) {
+      return "organizer";
+    }
+    if (location.pathname.startsWith("/donor")) {
+      return "donor";
+    }
+    
+    // Fallback to localStorage if available
     if (canSwitchRole) {
       const stored = localStorage.getItem("activeView");
       if (stored === "donor" || stored === "organizer") {
         return stored;
       }
     }
+    
     // Default to organizer view for organizers, donor for others
     return userRole === "organizer" ? "organizer" : "donor";
   });
+
+  // Sync activeView with URL changes (handles browser back/forward)
+  useEffect(() => {
+    if (location.pathname.startsWith("/organizer")) {
+      setActiveView("organizer");
+    } else if (location.pathname.startsWith("/donor") || location.pathname === "/" || location.pathname === "/homepage" || location.pathname === "/aboutus") {
+      setActiveView("donor");
+    }
+  }, [location.pathname]);
 
   // Persist view preference
   useEffect(() => {

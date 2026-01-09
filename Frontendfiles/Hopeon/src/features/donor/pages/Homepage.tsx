@@ -26,7 +26,7 @@ export default function Homepage() {
   return (
     <div className="relative w-full">
       {/* Hero Section */}
-      <div className="relative w-full bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white overflow-hidden">
+      <div className="relative w-full bg-linear-to-br from-blue-600 via-indigo-700 to-purple-800 text-white overflow-hidden">
         {/* Background Pattern */}
         <div
           className={`absolute inset-0 bg-[url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")] opacity-20`}
@@ -50,7 +50,7 @@ export default function Homepage() {
               <div className="space-y-4">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                   Empower Change.{" "}
-                  <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+                  <span className="bg-linear-to-rrom-yellow-300 to-orange-300 bg-clip-text text-transparent">
                     Fund Dreams.
                   </span>
                 </h1>
@@ -175,7 +175,7 @@ export default function Homepage() {
               </div>
 
               {/* Background Glow */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-3xl blur-3xl transform scale-110"></div>
+              <div className="absolute inset-0 bg-linear-to-r from-blue-400/20 to-purple-400/20 rounded-3xl blur-3xl transform scale-110"></div>
             </div>
           </div>
         </div>
@@ -186,7 +186,7 @@ export default function Homepage() {
       <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-6 py-2 text-sm font-medium mb-4">
+            <Badge className="bg-linear-to-r from-orange-500 to-amber-500 text-white px-6 py-2 text-sm font-medium mb-4">
               <Heart className="h-4 w-4 mr-2" />
               Featured Campaigns
             </Badge>

@@ -98,13 +98,13 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                <MapPin className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                 <span className="text-sm text-gray-400">
                   123 Hope Street, Charity City, CC 12345
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+                <Phone className="h-5 w-5 text-emerald-500 shrink-0" />
                 <a
                   href="tel:+1234567890"
                   className="text-sm text-gray-400 hover:text-emerald-400 transition-colors"
@@ -113,7 +113,7 @@ export default function Footer() {
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+                <Mail className="h-5 w-5 text-emerald-500 shrink-0" />
                 <a
                   href="mailto:support@hopeon.com"
                   className="text-sm text-gray-400 hover:text-emerald-400 transition-colors"

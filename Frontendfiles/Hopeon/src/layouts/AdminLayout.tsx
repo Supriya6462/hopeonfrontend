@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, FolderKanban, Building2, Heart, Wallet, LogOut, Menu, X, Shield } from "lucide-react";
+import { LayoutDashboard, Users, FolderKanban, Building2, Heart, Wallet, LogOut, Menu, X, Shield, Users2 } from "lucide-react";
 import { useState } from "react";
 import { ROUTES } from "@/routes/routes";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ const navItems = [
   { to: ROUTES.ADMIN_USERS, icon: Users, label: "Users" },
   { to: ROUTES.ADMIN_CAMPAIGNS, icon: FolderKanban, label: "Campaigns" },
   { to: ROUTES.ADMIN_ORGANIZERS, icon: Building2, label: "Organizers" },
+  { to: ROUTES.ADMIN_APPLICATIONS, icon: Users2, label: "KYC Applications of Organizer"},
   { to: ROUTES.ADMIN_DONATIONS, icon: Heart, label: "Donations" },
   { to: ROUTES.ADMIN_WITHDRAWALS, icon: Wallet, label: "Withdrawals" },
 ];

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ChevronDown, Heart, Briefcase, Check } from "lucide-react";
 import { useRoleContext, type ViewContext } from "@/context/RoleContext";
 import { ROUTES } from "@/routes/routes";
@@ -37,21 +37,25 @@ const viewOptions: { value: ViewContext; label: string; icon: typeof Heart; desc
  * Only visible to users with organizer role
  */
 export default function RoleSwitcher({ mobile = false }: RoleSwitcherProps) {
-  const { activeView, setActiveView, canSwitchRole } = useRoleContext();
+  const { activeView: contextActiveView, setActiveView, canSwitchRole } = useRoleContext();
   const navigate = useNavigate();
+  const location = useLocation();
 
   if (!canSwitchRole) return null;
+
+  // Derive activeView from URL to avoid race conditions (same as NavigationBar)
+  const activeView = location.pathname.startsWith("/organizer") ? "organizer" : contextActiveView;
 
   const currentView = viewOptions.find((v) => v.value === activeView) || viewOptions[0];
   const CurrentIcon = currentView.icon;
 
   const handleViewChange = (view: ViewContext) => {
     setActiveView(view);
-    // Navigate to the appropriate dashboard
+    // Navigate to the appropriate dashboard with proper URL structure
     if (view === "organizer") {
       navigate(ROUTES.ORGANIZER_DASHBOARD);
     } else {
-      navigate(ROUTES.DonorHomepage);
+      navigate(ROUTES.HOME);
     }
   };
 

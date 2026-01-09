@@ -1,12 +1,44 @@
 import { z } from "zod";
 
+/**
+ * Organizer Application Schema
+ * Validates the basic information form for organizer applications
+ */
 export const submitApplicationSchema = z.object({
-    organizationName: z.string().min(2, {message: "Organization name must be at least 2 characters"}),
-    description: z.string().min(20, {message: "Description must be at least 20 characters"}),
-    contactEmail: z.string().email({message: "Invalid email address"}).optional(),
-    phoneNumber: z.string().optional(),
-    website: z.string().url({message: "Invalid website URL"}).optional(),
-    organizationType: z.enum(["nonprofit", "charity", "individual", "business", "other"]).optional(),
+    organizationName: z
+        .string()
+        .min(2, { message: "Organization name must be at least 2 characters" })
+        .max(100, { message: "Organization name must be less than 100 characters" }),
+    
+    description: z
+        .string()
+        .min(20, { message: "Description must be at least 20 characters" })
+        .max(1000, { message: "Description must be less than 1000 characters" }),
+    
+    contactEmail: z
+        .string()
+        .email({ message: "Invalid email address" })
+        .optional()
+        .or(z.literal("")),
+    
+    phoneNumber: z
+        .string()
+        .optional()
+        .or(z.literal("")),
+
+    website: z
+        .string()
+        .optional()
+        .or(z.literal(""))
+        .refine(
+            (val) => !val || val === "" || z.string().url().safeParse(val).success,
+            { message: "Invalid website URL" }
+        ),
+    
+    organizationType: z
+        .enum(["nonprofit", "charity", "individual", "business", "other"])
+        .optional(),
+    
     documents: z.any().optional(),
 });
 

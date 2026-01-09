@@ -35,6 +35,7 @@ import { useRoleContext } from "@/context/RoleContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+
 interface User {
   _id: string;
   name: string;
@@ -65,11 +66,13 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
   const location = useLocation();
   
   // Get active view context (donor or organizer)
-  const { activeView } = useRoleContext();
+  const { activeView: contextActiveView } = useRoleContext();
+  
+  // Derive activeView from URL to avoid race conditions
+  const activeView = location.pathname.startsWith("/organizer") ? "organizer" : contextActiveView;
 
   const confirmLogout = () => {
     onLogout();
-    navigate(ROUTES.HOME);
     toast.success("Logged out successfully");
     setLogoutDialogOpen(false);
     setMobileMenuOpen(false);
@@ -103,7 +106,6 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
     // Organizer with organizer view active
     if (user.role === "organizer" && activeView === "organizer") {
       return [
-        ...baseLinks,
         { name: "Dashboard", path: ROUTES.ORGANIZER_DASHBOARD, icon: LayoutDashboard },
         { name: "My Campaigns", path: ROUTES.ORGANIZER_CAMPAIGNS, icon: FolderHeart },
         { name: "Withdrawals", path: ROUTES.ORGANIZER_WITHDRAWALS, icon: Wallet },
@@ -124,7 +126,7 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
 
   return (
     <>
-      <nav className="bg-gradient-to-r from-indigo-900 via-blue-800 to-purple-900 text-white shadow-xl sticky top-0 w-full z-50 backdrop-blur-sm">
+      <nav className="bg-linear-to-r from-indigo-900 via-blue-800 to-purple-900 text-white shadow-xl sticky top-0 w-full z-50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             {/* Logo */}
@@ -158,7 +160,7 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
               {user?.role === "donor" && !user?.isOrganizerApproved && (
                 <Link
                   to={ROUTES.APPLY_ORGANIZER}
-                  className="inline-flex items-center gap-2 px-4 py-2 ml-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm font-medium"
+                  className="inline-flex items-center gap-2 px-4 py-2 ml-2 bg-linear-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm font-medium"
                 >
                   <UserCheck className="h-4 w-4" />
                   Become Organizer
@@ -186,10 +188,19 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
                 </Link>
               )}
 
+              {/* {user?.role === "organizer" && activeView === "organizer" && (
+                <Select>
+                  <SelectContent>
+                    <SelectItem value="Donor">Donor</SelectItem>
+                    <SelectItem value="Organizer">Organizer</SelectItem>
+                  </SelectContent>
+                   </Select>
+              )} */}
+
               {/* Role Switcher / Admin Badge */}
               <div className="flex items-center ml-4 pl-4 border-l border-white/20">
                 {user?.role === "admin" ? (
-                  <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white font-medium px-3 py-1">
+                  <Badge className="bg-linear-to-r from-red-500 to-pink-500 text-white font-medium px-3 py-1">
                     Admin
                   </Badge>
                 ) : (
@@ -204,7 +215,11 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleNavigation(ROUTES.DONOR_PROFILE)}
+                      onClick={() => handleNavigation(
+                        user.role === "organizer" && activeView === "organizer" 
+                          ? ROUTES.ORGANIZER_PROFILE 
+                          : ROUTES.DONOR_PROFILE
+                      )}
                       className="text-white hover:bg-white/10 gap-2"
                     >
                       <User className="h-4 w-4" />
@@ -281,7 +296,7 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-gradient-to-r from-indigo-900 via-blue-800 to-purple-900 backdrop-blur-md border-t border-white/10 animate-in slide-in-from-top-2">
+          <div className="lg:hidden bg-linear-to-r from-indigo-900 via-blue-800 to-purple-900 backdrop-blur-md border-t border-white/10 animate-in slide-in-from-top-2">
             <div className="px-4 py-4 space-y-1">
               {navLinks.map(({ name, path, icon: Icon }) => (
                 <Link
@@ -305,7 +320,7 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
                 <Link
                   to={ROUTES.APPLY_ORGANIZER}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 mt-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md text-sm font-medium"
+                  className="flex items-center gap-3 px-4 py-3 mt-2 bg-linear-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md text-sm font-medium"
                 >
                   <UserCheck className="h-5 w-5" />
                   Become Organizer
@@ -335,7 +350,7 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
               <div className="py-2 border-t border-white/10 mt-2">
                 {user?.role === "admin" ? (
                   <div className="px-4 py-2">
-                    <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white font-medium px-3 py-1">
+                    <Badge className="bg-linear-to-r from-red-500 to-pink-500 text-white font-medium px-3 py-1">
                       Admin
                     </Badge>
                   </div>
@@ -350,7 +365,11 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
                   <>
                     <Button
                       variant="ghost"
-                      onClick={() => handleNavigation(ROUTES.DONOR_PROFILE)}
+                      onClick={() => handleNavigation(
+                        user.role === "organizer" && activeView === "organizer" 
+                          ? ROUTES.ORGANIZER_PROFILE 
+                          : ROUTES.DONOR_PROFILE
+                      )}
                       className="w-full justify-start text-white hover:bg-white/10 gap-3"
                     >
                       <User className="h-5 w-5" />

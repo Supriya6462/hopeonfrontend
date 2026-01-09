@@ -26,6 +26,7 @@ import OrganizerDashboard from "@/features/organizer/pages/Dashboard";
 
 // Admin Pages
 import AdminDashboard from "@/features/admin/pages/Dashboard";
+import { Adminkycverification, Adminorganizermanagement } from "@/features/admin/pages";
 
 import { ROUTES } from "./routes";
 import { ApplyOrganizer, DonorAboutus, DonorHomepage } from "@/features/donor/pages";
@@ -93,7 +94,7 @@ const routesConfig: RouteObject[] = [
   {
     path: "/donor",
     element: (
-      <ProtectedRoute allowedRoles={["donor"]}>
+      <ProtectedRoute allowedRoles={["donor", "organizer"]}>
         <DonorLayout />
       </ProtectedRoute>
     ),
@@ -196,7 +197,7 @@ const routesConfig: RouteObject[] = [
       },
       {
         path: "organizers",
-        element: <div className="p-4">Organizers Management - Coming soon</div>,
+        element: <Adminorganizermanagement />
       },
       {
         path: "donations",
@@ -206,6 +207,10 @@ const routesConfig: RouteObject[] = [
         path: "withdrawals",
         element: <div className="p-4">Withdrawals Management - Coming soon</div>,
       },
+      {
+        path: "Applications",
+        element: <Adminkycverification /> ,
+      }
     ],
   },
 
@@ -213,7 +218,7 @@ const routesConfig: RouteObject[] = [
   {
     path: "*",
     element: (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-blue-50 to-indigo-50">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-emerald-50 via-blue-50 to-indigo-50">
         <div className="text-center">
           <h1 className="text-6xl font-bold text-gray-800 mb-4">404</h1>
           <p className="text-xl text-gray-600 mb-8">Page not found</p>

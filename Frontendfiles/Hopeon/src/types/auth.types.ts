@@ -17,8 +17,12 @@ export interface User {
   role: "donor" | "organizer" | "admin";
   phoneNumber?: string;
   image?: string;
+  isEmailVerified?: boolean;
   isOrganizerApproved: boolean;
   isOrganizerRevoked: boolean;
+  revokedAt?: string;
+  revokedBy?: string;
+  revocationReason?: string;
   createdAt: string;
   updatedAt: string;
 }
