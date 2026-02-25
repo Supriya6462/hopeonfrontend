@@ -15,16 +15,20 @@ const RoleContext = createContext<RoleContextType | undefined>(undefined);
 interface RoleProviderProps {
   children: ReactNode;
   userRole: UserRole | undefined;
+  isOrganizerRevoked?: boolean;
 }
 
 /**
  * RoleProvider - Manages the active view context for users who can switch roles
  * Organizers can switch between donor and organizer views
  * Syncs activeView with URL path to maintain consistency on refresh
+ * SECURITY: Revoked organizers cannot switch to organizer view
  */
-export function RoleProvider({ children, userRole }: RoleProviderProps) {
+export function RoleProvider({ children, userRole, isOrganizerRevoked = false }: RoleProviderProps) {
   const location = useLocation();
-  const canSwitchRole = userRole === "organizer";
+  
+  // SECURITY CHECK: Revoked organizers cannot switch roles
+  const canSwitchRole = userRole === "organizer" && !isOrganizerRevoked;
   
   const [activeView, setActiveView] = useState<ViewContext>(() => {
     // Determine initial view from URL path

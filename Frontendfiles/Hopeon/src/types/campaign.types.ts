@@ -27,7 +27,7 @@ export interface Campaign {
   description?: string;
   images: string[];
   target: number;
-  raised: number;
+  fundingType: "flexible" | "all_or_nothing";
   owner: string;
   isApproved: boolean;
   isClosed: boolean;

@@ -6,6 +6,7 @@ interface User {
   email: string;
   role: "donor" | "organizer" | "admin";
   isOrganizerApproved?: boolean;
+  isOrganizerRevoked?: boolean;
 }
 
 interface AuthContextType {

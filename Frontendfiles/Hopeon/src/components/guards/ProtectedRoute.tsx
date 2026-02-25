@@ -12,6 +12,7 @@ interface ProtectedRouteProps {
  * Optionally restricts access based on user roles
  * Note: Admin role has access to all protected routes
  * Note: Organizers can access both donor and organizer routes
+ * SECURITY: Revoked organizers are blocked from organizer routes
  */
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const location = useLocation();
@@ -27,14 +28,30 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
   try {
     const user = JSON.parse(userStr);
     const userRole: Role = user.role;
+    const isOrganizerRevoked = user.isOrganizerRevoked || false;
 
     // Admin has access to everything
     if (userRole === "admin") {
       return <>{children}</>;
     }
 
-    // Organizers can access both donor and organizer routes
-    if (userRole === "organizer") {
+    // SECURITY CHECK: Block revoked organizers from organizer routes
+    if (userRole === "organizer" && isOrganizerRevoked) {
+      // Check if trying to access organizer routes
+      if (location.pathname.startsWith("/organizer")) {
+        // Redirect to donor homepage with error message
+        return <Navigate to={ROUTES.HOME} state={{ 
+          error: "Your organizer access has been revoked. Please contact support." 
+        }} replace />;
+      }
+      // Allow access to donor routes
+      if (allowedRoles && allowedRoles.includes("donor")) {
+        return <>{children}</>;
+      }
+    }
+
+    // Organizers can access both donor and organizer routes (if not revoked)
+    if (userRole === "organizer" && !isOrganizerRevoked) {
       if (allowedRoles && (allowedRoles.includes("donor") || allowedRoles.includes("organizer"))) {
         return <>{children}</>;
       }

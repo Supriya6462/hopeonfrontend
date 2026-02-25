@@ -19,7 +19,7 @@ export default function OrganizerLayout() {
   };
 
   return (
-    <RoleProvider userRole={user?.role}>
+    <RoleProvider userRole={user?.role} isOrganizerRevoked={user?.isOrganizerRevoked}>
       <div className="min-h-screen flex flex-col bg-gray-50">
         {/* Navigation Bar */}
         <NavigationBar user={user} onLogout={handleLogout} />
