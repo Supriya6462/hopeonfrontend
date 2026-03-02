@@ -17,6 +17,12 @@ export const authAPI = {
     return response.data;
   },
 
+  logout: async() => {
+    const response = await api.post("/api/auth/logout");
+    return response;
+    
+  },
+
   // Request OTP
   requestOtp: async (email: string, purpose: OtpPurposeType) => {
     const response = await api.post("/api/auth/request-otp", { email, purpose });

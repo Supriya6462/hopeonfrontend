@@ -76,7 +76,17 @@ export default function Applyfororganizer() {
 
   // FIXED: Proper typing for form values
   const onSubmitBasicInfo = (values: any) => {
-    applyMutation.mutate(values);
+    // Convert form data to JSON for draft application
+    const applicationData = {
+      organizationName: values.organizationName,
+      description: values.description,
+      contactEmail: values.contactEmail || undefined,
+      phoneNumber: values.phoneNumber || undefined,
+      website: values.website || undefined,
+      organizationType: values.organizationType,
+    };
+    
+    applyMutation.mutate(applicationData);
   };
 
   // Document submission handler
@@ -101,7 +111,7 @@ export default function Applyfororganizer() {
   // Loading state
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -190,16 +200,16 @@ export default function Applyfororganizer() {
 //   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <Badge className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 text-sm font-medium mb-6">
+          <Badge className="bg-linear-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 text-sm font-medium mb-6">
             <UserCheck className="h-4 w-4 mr-2" />
             Organizer Application
           </Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-purple-700 via-indigo-600 to-blue-600 bg-clip-text text-transparent">
               Become a Campaign
             </span>
             <br />
@@ -237,7 +247,7 @@ export default function Applyfororganizer() {
         {/* Step 1: Basic Information */}
         {step === 1 && (
           <Card className="bg-white shadow-xl border-0 overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+            <CardHeader className="bg-linear-to-r from-purple-600 to-indigo-600 text-white">
               <CardTitle className="flex items-center gap-3 text-xl">
                 <FileText className="h-6 w-6" />
                 Organization Information
@@ -356,7 +366,7 @@ export default function Applyfororganizer() {
 
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
                     <div className="text-sm text-blue-800">
                       <p className="font-medium mb-1">Next Step: Document Verification</p>
                       <p>
@@ -387,7 +397,7 @@ export default function Applyfororganizer() {
         {/* Step 2: Document Upload */}
         {step === 2 && (
           <Card className="bg-white shadow-xl border-0 overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+            <CardHeader className="bg-linear-to-r from-green-600 to-emerald-600 text-white">
               <CardTitle className="flex items-center gap-3 text-xl">
                 <Shield className="h-6 w-6" />
                 Verification Documents

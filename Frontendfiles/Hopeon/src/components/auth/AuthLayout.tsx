@@ -12,10 +12,10 @@ interface AuthLayoutProps {
  */
 export const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-emerald-50 via-blue-50 to-indigo-50 flex">
+    <div className="min-h-[calc(100vh-4rem)] from-emerald-50 via-blue-50 to-indigo-50 flex">
       {/* Left Side - Hero Section */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/90 via-blue-600/90 to-indigo-600/90 z-10"></div>
+        <div className="absolute inset-0 from-emerald-600/90 via-blue-600/90 to-indigo-600/90 z-10"></div>
         <img
           src="https://plus.unsplash.com/premium_photo-1683140538884-07fb31428ca6?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0"
           alt="Community coming together"
@@ -35,7 +35,7 @@ export const AuthLayout = ({ children }: AuthLayoutProps) => {
             <h1 className="text-5xl font-bold mb-6 leading-tight">
               Start Making a
               <br />
-              <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+              <span className="from-yellow-300 to-orange-300 bg-clip-text text-transparent">
                 Real Difference
               </span>
             </h1>

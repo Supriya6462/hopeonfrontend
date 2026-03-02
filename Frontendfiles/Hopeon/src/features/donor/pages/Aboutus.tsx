@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 
 export default function Aboutus() {
     return(
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="min-h-screen bg-linear-to-brrom-slate-50 via-blue-50 to-indigo-50">
       {/* Mission Section */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-300"></div>
+              <div className="absolute inset-0 bg-linear-to-r from-blue-400/20 to-purple-400/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-300"></div>
               <img
                 src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0"
                 alt="Helping hands coming together"
@@ -36,14 +36,14 @@ export default function Aboutus() {
             </div>
 
             <div className="space-y-6">
-              <Badge className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2">
+              <Badge className="bg-linear-to-rrom-blue-500 to-indigo-500 text-white px-4 py-2">
                 <Target className="h-4 w-4 mr-2" />
                 Our Mission
               </Badge>
 
               <h2 className="text-4xl font-bold text-gray-900 leading-tight">
                 Creating a World Where
-                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   {" "}
                   Every Cause Matters
                 </span>
@@ -82,7 +82,7 @@ export default function Aboutus() {
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="lg:order-2 relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-300"></div>
+              <div className="absolute inset-0 bg-linear-to-r from-purple-400/20 to-pink-400/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-300"></div>
               <img
                 src="https://images.unsplash.com/photo-1727553957790-3f8f7a0f5614?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0"
                 alt="Education and community support"
@@ -106,14 +106,14 @@ export default function Aboutus() {
             </div>
 
             <div className="lg:order-1 space-y-6">
-              <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2">
+              <Badge className="bg-linear-to-r from-purple-500 to-pink-500 text-white px-4 py-2">
                 <Globe className="h-4 w-4 mr-2" />
                 Our Vision
               </Badge>
 
               <h2 className="text-4xl font-bold text-gray-900 leading-tight">
                 Building a
-                <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   {" "}
                   Connected World
                 </span>
@@ -128,7 +128,7 @@ export default function Aboutus() {
                 in communities around the world.
               </p>
 
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+              <div className="bg-linear-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
                 <h3 className="font-semibold text-gray-900 mb-3">
                   Our Commitment
                 </h3>
@@ -147,13 +147,13 @@ export default function Aboutus() {
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-2 text-sm font-medium mb-6">
+            <Badge className="bg-linear-to-r from-amber-500 to-orange-500 text-white px-6 py-2 text-sm font-medium mb-6">
               <Heart className="h-4 w-4 mr-2" />
               Our Core Values
             </Badge>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               The Principles That
-              <span className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
                 {" "}
                 Guide Us
               </span>
@@ -205,7 +205,7 @@ export default function Aboutus() {
                     className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div
-                    className={`absolute inset-0 bg-gradient-to-t ${value.color} opacity-20 group-hover:opacity-30 transition-opacity duration-300`}
+                    className={`absolute inset-0 bg-linear-to-t ${value.color} opacity-20 group-hover:opacity-30 transition-opacity duration-300`}
                   ></div>
 
                   {/* Floating Icon */}
@@ -234,7 +234,7 @@ export default function Aboutus() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+      <section className="py-16 px-4 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
             Ready to Be Part of Something Bigger?

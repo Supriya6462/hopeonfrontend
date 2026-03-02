@@ -166,6 +166,199 @@ export default function ApplicationDetailsModal({
                 </div>
               </div>
 
+              {/* Uploaded Documents */}
+              {application.documents && (
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    Uploaded Documents
+                  </h4>
+                  <div className="space-y-4">
+                    {/* Identity Documents */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h5 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Identity Verification
+                      </h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {application.documents.governmentId && (
+                          <div className="bg-white rounded-lg p-3 border border-blue-100">
+                            <label className="text-sm font-medium text-gray-700 block mb-2">
+                              Government ID
+                            </label>
+                            <a
+                              href={application.documents.governmentId.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                              View Document
+                            </a>
+                            <img 
+                              src={application.documents.governmentId.url} 
+                              alt="Government ID" 
+                              className="mt-2 w-full h-32 object-cover rounded border border-gray-200"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+                        {application.documents.selfieWithId && (
+                          <div className="bg-white rounded-lg p-3 border border-blue-100">
+                            <label className="text-sm font-medium text-gray-700 block mb-2">
+                              Selfie with ID
+                            </label>
+                            <a
+                              href={application.documents.selfieWithId.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                              View Document
+                            </a>
+                            <img 
+                              src={application.documents.selfieWithId.url} 
+                              alt="Selfie with ID" 
+                              className="mt-2 w-full h-32 object-cover rounded border border-gray-200"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Organization Documents */}
+                    {(application.documents.registrationCertificate || 
+                      application.documents.taxId || 
+                      application.documents.addressProof) && (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h5 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Organization Documents
+                        </h5>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {application.documents.registrationCertificate && (
+                            <div className="bg-white rounded-lg p-3 border border-green-100">
+                              <label className="text-sm font-medium text-gray-700 block mb-2">
+                                Registration Certificate
+                              </label>
+                              <a
+                                href={application.documents.registrationCertificate.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 text-sm font-medium"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                View Document
+                              </a>
+                              <img 
+                                src={application.documents.registrationCertificate.url} 
+                                alt="Registration Certificate" 
+                                className="mt-2 w-full h-32 object-cover rounded border border-gray-200"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                          {application.documents.taxId && (
+                            <div className="bg-white rounded-lg p-3 border border-green-100">
+                              <label className="text-sm font-medium text-gray-700 block mb-2">
+                                Tax ID / EIN
+                              </label>
+                              <a
+                                href={application.documents.taxId.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 text-sm font-medium"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                View Document
+                              </a>
+                              <img 
+                                src={application.documents.taxId.url} 
+                                alt="Tax ID" 
+                                className="mt-2 w-full h-32 object-cover rounded border border-gray-200"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                          {application.documents.addressProof && (
+                            <div className="bg-white rounded-lg p-3 border border-green-100">
+                              <label className="text-sm font-medium text-gray-700 block mb-2">
+                                Address Proof
+                              </label>
+                              <a
+                                href={application.documents.addressProof.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 text-sm font-medium"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                View Document
+                              </a>
+                              <img 
+                                src={application.documents.addressProof.url} 
+                                alt="Address Proof" 
+                                className="mt-2 w-full h-32 object-cover rounded border border-gray-200"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Additional Documents */}
+                    {application.documents.additionalDocuments && 
+                     application.documents.additionalDocuments.length > 0 && (
+                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h5 className="font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                          Additional Documents
+                        </h5>
+                        <div className="space-y-2">
+                          {application.documents.additionalDocuments.map((doc, index) => (
+                            <div key={index} className="bg-white rounded-lg p-3 border border-purple-100">
+                              <a
+                                href={doc.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-800 text-sm font-medium"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                {doc.name}
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Review Info */}
               {(application.reviewedAt || application.rejectionReason) && (
                 <div>

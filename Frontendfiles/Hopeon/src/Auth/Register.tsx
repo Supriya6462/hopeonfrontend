@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, User, ArrowRight } from "lucide-react";
+import { Mail, User, ArrowRight, PhoneCall } from "lucide-react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 import {
@@ -104,6 +104,31 @@ export default function Register() {
                           <Input
                             type="email"
                             placeholder="Enter you email"
+                            className="pl-10 h-12 border-2 border-gray-200 focus:border-emerald-500 rounded-xl"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                                {/* Phone number Field */}
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700">
+                        Phone Number
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <PhoneCall className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          <Input
+                            type="number"
+                            placeholder="Enter you Phone number"
                             className="pl-10 h-12 border-2 border-gray-200 focus:border-emerald-500 rounded-xl"
                             {...field}
                           />

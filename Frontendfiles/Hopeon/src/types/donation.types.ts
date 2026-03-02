@@ -43,6 +43,10 @@ export interface Donation {
   donorEmail: string;
   amount: number;
   method: DonationMethod;
+  amountInUSD?: number | null;
+  exchangeRateUsed?: number | null;
+  platformFee:number;
+  netAmount: number;
   transactionId?: string;
   payerEmail?: string;
   payerName?: string;
@@ -52,6 +56,11 @@ export interface Donation {
   transactionHash?: string;
   network?: string;
   status: DonationStatus;
+  blockConfirmations?: number | null;
+  blockNumber?: number | null;
+  paymentInitiatedAt?: Date | null;
+  paymentVerifiedAt?: Date | null;
+  failedReason?: string | null;
   createdAt: string;
   updatedAt: string;
 }

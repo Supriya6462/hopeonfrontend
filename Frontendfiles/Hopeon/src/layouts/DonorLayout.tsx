@@ -1,8 +1,9 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { NavigationBar, Footer } from "@/components/shared";
 import { RoleProvider } from "@/context/RoleContext";
 import { useAuth } from "@/context/AuthContext";
-import { ROUTES } from "@/routes/routes";
+// import { ROUTES } from "@/routes/routes";
+import { useLogout } from "@/hooks/useAuth";
 
 /**
  * DonorLayout - Main layout wrapper for donor/public pages
@@ -10,19 +11,20 @@ import { ROUTES } from "@/routes/routes";
  * Includes RoleProvider for context switching (organizers can switch views)
  */
 export default function DonorLayout() {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  // const navigate = useNavigate();
+  const { user } = useAuth();
+  const { logout } = useLogout();
 
-  const handleLogout = () => {
-    logout();
-    navigate(ROUTES.HOME, { replace: true });
-  };
+  // const handleLogout = () => {
+  //   logout();
+  //   navigate(ROUTES.HOME, { replace: true });
+  // };
 
   return (
     <RoleProvider userRole={user?.role} isOrganizerRevoked={user?.isOrganizerRevoked}>
       <div className="min-h-screen flex flex-col bg-gray-50">
         {/* Navigation Bar */}
-        <NavigationBar user={user} onLogout={handleLogout} />
+        <NavigationBar user={user} onLogout={logout} />
 
         {/* Main Content */}
         <main className="flex-1">

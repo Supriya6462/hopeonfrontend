@@ -16,14 +16,20 @@ interface DocumentMutationVariables {
 
 export function useOrganizerApplication({ onStepChange, onSuccessRedirect}: UseOrganizerApplicationParams) {
     const applyMutation = useMutation({
-        mutationFn: donorOrganizerAPI.applyAsOrganizer,
-        onSuccess: (data: any) => {
-            onStepChange(2, data.data.applicationId);
+        mutationFn: donorOrganizerAPI.OrganizerApplicationDraft,
+        onSuccess: (response: any) => {
+            // Backend returns: { success: true, message: "...", data: { application: { _id: "..." } } }
+            const applicationId = response.data?.application?._id;
+            if (!applicationId) {
+                toast.error("Failed to get application ID from response");
+                return;
+            }
+            onStepChange(2, applicationId);
             toast.success("✅ Basic info saved! Upload documents to continue.");
         },
-            onError: (err: any) => {
-      toast.error(err.response?.data?.message || "Failed to submit application");
-    },
+        onError: (err: any) => {
+            toast.error(err.response?.data?.message || "Failed to submit application");
+        },
     });
 
     const documentMutation = useMutation({

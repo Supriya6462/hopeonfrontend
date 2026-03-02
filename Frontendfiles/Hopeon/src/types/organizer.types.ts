@@ -50,19 +50,47 @@ export interface WithdrawalFilters {
   limit?: number;
 }
 
+export interface DocumentFile {
+  url: string;
+  publicId: string;
+  uploadedAt: string;
+}
+
+export interface AdditionalDocument extends DocumentFile {
+  name: string;
+}
+
+export interface ApplicationDocuments {
+  governmentId?: DocumentFile;
+  selfieWithId?: DocumentFile;
+  registrationCertificate?: DocumentFile;
+  taxId?: DocumentFile;
+  addressProof?: DocumentFile;
+  additionalDocuments?: AdditionalDocument[];
+}
+
 export interface OrganizerApplication {
   _id: string;
-  user: string;
+  user: string | {
+    _id: string;
+    name: string;
+    email: string;
+    phoneNumber?: string;
+  };
   organizationName: string;
   description: string;
   contactEmail?: string;
   phoneNumber?: string;
   website?: string;
   organizationType?: OrganizationType;
-  documents?: any;
+  documents?: ApplicationDocuments;
   documentsVerified: boolean;
   status: ApplicationStatus;
-  reviewedBy?: string;
+  reviewedBy?: string | {
+    _id: string;
+    name: string;
+    email: string;
+  };
   reviewedAt?: string;
   rejectionReason?: string;
   adminNotes?: string;

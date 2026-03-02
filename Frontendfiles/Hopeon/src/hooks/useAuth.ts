@@ -26,6 +26,7 @@ export const useRegister = () => {
             name: variables.name,
             email: variables.email,
             password: variables.password,
+            phoneNumber: variables.phoneNumber
           })
         );
       } catch (error) {
@@ -103,8 +104,8 @@ export const useLogin = () => {
       
       // Store authentication token
       try {
-        localStorage.setItem("authToken", data.data.token);
-        localStorage.setItem("user", JSON.stringify(data.data.user));
+        localStorage.setItem("authToken", data.data.accessToken);
+        localStorage.setItem("user", JSON.stringify(data.data.result));
         // Dispatch custom event to notify AuthContext of the change
         window.dispatchEvent(new Event("auth-change"));
       } catch (error) {
@@ -112,7 +113,7 @@ export const useLogin = () => {
       }
       
       // Navigate based on user role
-      const userRole = data.data.user.role;
+      const userRole = data.data.result.role;
       
       switch (userRole) {
         case "admin":
@@ -131,4 +132,23 @@ export const useLogin = () => {
       toast.error(error.message || "Login failed. Please check your credentials.");
     },
   });
+};
+
+export const useLogout = () => {
+  const navigate = useNavigate();
+
+  const logout = async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
+      window.dispatchEvent(new Event("auth-change"));
+      navigate(ROUTES.LOGIN, { replace: true });
+    }
+  };
+
+  return { logout };
 };
