@@ -26,7 +26,6 @@ export const donorDonationAPI = {
 // ==================== Organizer Application APIs (Donor) ====================
 
 export const donorOrganizerAPI = {
-   
   // Submit organizer application (deprecated - use draft flow instead)
   applyAsOrganizer: async (data: FormData) => {
     const response = await api.post("/api/organizer/apply", data);
@@ -37,7 +36,7 @@ export const donorOrganizerAPI = {
   OrganizerApplicationDraft: async (data: Record<string, any>) => {
     const response = await api.post("/api/organizer/apply/draft", data, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
     return response.data;
@@ -45,7 +44,16 @@ export const donorOrganizerAPI = {
 
   // Upload documents and submit (Step 2: Documents)
   OrganizerDocument: async (applicationId: string, data: FormData) => {
-    const response = await api.post(`/api/organizer/apply/${applicationId}/documents`, data);
+    const response = await api.post(
+      `/api/organizer/apply/${applicationId}/documents`,
+      data,
+    );
+    return response.data;
+  },
+
+  // Get draft application (to resume Step 2)
+  getDraftApplication: async () => {
+    const response = await api.get("/api/organizer/apply/draft");
     return response.data;
   },
 

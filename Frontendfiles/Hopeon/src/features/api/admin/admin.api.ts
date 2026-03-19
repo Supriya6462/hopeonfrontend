@@ -5,7 +5,6 @@ import type {
   ApplicationFilters,
   WithdrawalFilters,
   UpdateCampaignDTO,
-  UpdateDonationPaymentDetails,
 } from "../../../types";
 import type { DonationStatus } from "../../../enums";
 
@@ -60,23 +59,16 @@ export const adminDonationAPI = {
     return response.data;
   },
 
-  // Update donation status
-  updateDonationStatus: async (
-    id: string,
-    status: DonationStatus,
-    paymentDetails?: UpdateDonationPaymentDetails
-  ) => {
-    const response = await api.patch(`/api/donations/${id}/status`, {
-      status,
-      paymentDetails,
-    });
+  // Update donation status (admin only — backend only accepts { status })
+  updateDonationStatus: async (id: string, status: DonationStatus) => {
+    const response = await api.patch(`/api/donations/${id}/status`, { status });
     return response.data;
   },
 
   // Get campaign donations
   getCampaignDonations: async (
     campaignId: string,
-    params?: { page?: number; limit?: number }
+    params?: { page?: number; limit?: number },
   ) => {
     const response = await api.get(`/api/donations/campaign/${campaignId}`, {
       params,
@@ -113,16 +105,29 @@ export const adminOrganizerAPI = {
   },
 
   // Approve organizer application
-  approveApplication: async (id: string) => {
-    const response = await api.patch(`/api/organizer/applications/${id}/approve`);
+  approveApplication: async (id: string, adminNotes?: string) => {
+    const response = await api.patch(
+      `/api/organizer/applications/${id}/approve`,
+      {
+        adminNotes,
+      },
+    );
     return response.data;
   },
 
   // Reject organizer application
-  rejectApplication: async (id: string, rejectionReason: string) => {
-    const response = await api.patch(`/api/organizer/applications/${id}/reject`, {
-      rejectionReason,
-    });
+  rejectApplication: async (
+    id: string,
+    rejectionReason: string,
+    adminNotes?: string,
+  ) => {
+    const response = await api.patch(
+      `/api/organizer/applications/${id}/reject`,
+      {
+        rejectionReason,
+        adminNotes,
+      },
+    );
     return response.data;
   },
 
@@ -162,11 +167,9 @@ export const adminWithdrawalAPI = {
     return response.data;
   },
 
-  // Approve withdrawal request
-  approveWithdrawal: async (id: string, adminMessage?: string) => {
-    const response = await api.patch(`/api/withdrawals/${id}/approve`, {
-      adminMessage,
-    });
+  // Approve withdrawal request (no body needed — admin ID comes from auth)
+  approveWithdrawal: async (id: string) => {
+    const response = await api.patch(`/api/withdrawals/${id}/approve`);
     return response.data;
   },
 

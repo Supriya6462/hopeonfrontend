@@ -1,4 +1,3 @@
-
 export type Role = "donor" | "organizer" | "admin";
 
 export type DonationMethod = "paypal" | "crypto";
@@ -16,7 +15,7 @@ export const OtpPurpose = {
 
 export type OtpPurposeType = "register" | "forget-password";
 
-export type WithdrawalStatus = "pending" | "approved" | "rejected" | "paid";
+export type WithdrawalStatus = "requested" | "approved" | "rejected" | "paid";
 
 export type OrganizationType =
   | "nonprofit"

@@ -1,4 +1,9 @@
-import type { ApplicationStatus, OrganizationType, WithdrawalStatus, PayoutMethod } from "../enums";
+import type {
+  ApplicationStatus,
+  OrganizationType,
+  WithdrawalStatus,
+  PayoutMethod,
+} from "../enums";
 
 export interface SubmitApplicationDTO {
   organizationName: string;
@@ -71,12 +76,14 @@ export interface ApplicationDocuments {
 
 export interface OrganizerApplication {
   _id: string;
-  user: string | {
-    _id: string;
-    name: string;
-    email: string;
-    phoneNumber?: string;
-  };
+  user:
+    | string
+    | {
+        _id: string;
+        name: string;
+        email: string;
+        phoneNumber?: string;
+      };
   organizationName: string;
   description: string;
   contactEmail?: string;
@@ -86,11 +93,13 @@ export interface OrganizerApplication {
   documents?: ApplicationDocuments;
   documentsVerified: boolean;
   status: ApplicationStatus;
-  reviewedBy?: string | {
-    _id: string;
-    name: string;
-    email: string;
-  };
+  reviewedBy?:
+    | string
+    | {
+        _id: string;
+        name: string;
+        email: string;
+      };
   reviewedAt?: string;
   rejectionReason?: string;
   adminNotes?: string;
@@ -117,9 +126,14 @@ export interface ApplicationsListResponse {
 
 export interface WithdrawalRequest {
   _id: string;
-  organizer: string;
-  campaign: string;
+  organizer:
+    | string
+    | { _id: string; name: string; email: string; phoneNumber?: string };
+  campaign:
+    | string
+    | { _id: string; title: string; raised: number; target: number };
   amountRequested: number;
+  availableBalanceSnapshot?: number;
   payoutMethod: PayoutMethod;
   bankDetails?: {
     accountHolderName?: string;
@@ -137,8 +151,9 @@ export interface WithdrawalRequest {
   status: WithdrawalStatus;
   adminMessage?: string;
   paidAt?: string;
+  netAmountPaid?: number;
   paymentReference?: string;
-  reviewedBy?: string;
+  reviewedBy?: string | { _id: string; name: string; email: string };
   createdAt: string;
   updatedAt: string;
 }
