@@ -1,4 +1,5 @@
 import axios, { type AxiosError } from "axios";
+import { clearAuthStorage } from "@/lib/auth";
 
 /**
  * Base API URL from environment variables
@@ -29,7 +30,7 @@ api.interceptors.request.use(
   (error) => {
     console.error("Request error:", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 /**
@@ -46,31 +47,32 @@ api.interceptors.response.use(
         baseURL: BASE_URL,
         endpoint: error.config?.url,
       });
-      
+
       return Promise.reject({
-        message: "Cannot connect to server. Please check if the backend is running.",
+        message:
+          "Cannot connect to server. Please check if the backend is running.",
         originalError: error,
       });
     }
 
     // Handle HTTP errors
     const status = error.response.status;
-    
+
     switch (status) {
       case 401:
         // Unauthorized - Clear auth and redirect to login
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("user");
+        clearAuthStorage();
+        window.dispatchEvent(new Event("auth-change"));
         if (window.location.pathname !== "/login") {
           window.location.href = "/login";
         }
         break;
-        
+
       case 403:
         // Forbidden
         console.error("Access forbidden:", error.response.data);
         break;
-        
+
       case 404:
         // Not found
         console.error("API endpoint not found:", {
@@ -79,7 +81,7 @@ api.interceptors.response.use(
           fullURL: `${BASE_URL}${error.config?.url}`,
         });
         break;
-        
+
       case 500:
         // Server error
         console.error("Server error:", error.response.data);
@@ -87,7 +89,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

@@ -1,5 +1,6 @@
 import type { OrganizerApplication } from "@/types";
 import type { ApplicationStatus } from "@/enums";
+import { getApplicationStatus } from "@/lib/organizerApplication";
 
 interface ApplicationCardProps {
   application: OrganizerApplication;
@@ -14,6 +15,8 @@ export default function ApplicationCard({
   onReject,
   onViewDetails,
 }: ApplicationCardProps) {
+  const normalizedStatus = getApplicationStatus(application);
+
   const getStatusBadge = (status: ApplicationStatus) => {
     const styles = {
       pending: "bg-amber-50 border-amber-200 text-amber-700",
@@ -55,10 +58,10 @@ export default function ApplicationCard({
         </div>
         <span
           className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge(
-            application.status
+            normalizedStatus,
           )}`}
         >
-          {application.status.toUpperCase()}
+          {normalizedStatus.toUpperCase()}
         </span>
       </div>
 
@@ -109,7 +112,7 @@ export default function ApplicationCard({
           >
             View Details
           </button>
-          {application.status === "pending" && (
+          {normalizedStatus === "pending" && (
             <>
               <button
                 onClick={() => onApprove(application._id)}

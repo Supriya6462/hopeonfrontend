@@ -8,7 +8,12 @@ import {
   ApplicationDetailsModal,
   RejectModal,
 } from "../components";
+import type { RejectPayload } from "../components/RejectModal";
 import type { OrganizerApplication } from "@/types";
+import {
+  extractApplicationsFromResponse,
+  normalizeOrganizerApplication,
+} from "@/lib/organizerApplication";
 
 export default function KycApplicationofOrganizer() {
   const { data, isLoading, isError, error } = usemyapplications();
@@ -25,7 +30,9 @@ export default function KycApplicationofOrganizer() {
   } | null>(null);
 
   // Get applications from response
-  const applications = data?.data?.applications || data?.applications || [];
+  const applications = extractApplicationsFromResponse(data).map(
+    (application) => normalizeOrganizerApplication(application),
+  ) as OrganizerApplication[];
 
   // Use filters hook
   const {
@@ -45,7 +52,7 @@ export default function KycApplicationofOrganizer() {
 
   const handleApprove = (id: string) => {
     if (confirm("Are you sure you want to approve this application?")) {
-      approveApplication(id);
+      approveApplication({ id });
     }
   };
 
@@ -54,9 +61,9 @@ export default function KycApplicationofOrganizer() {
     setIsRejectModalOpen(true);
   };
 
-  const handleRejectConfirm = (reason: string) => {
+  const handleRejectConfirm = ({ reason, adminNotes }: RejectPayload) => {
     if (applicationToReject) {
-      rejectApplication({ id: applicationToReject.id, reason });
+      rejectApplication({ id: applicationToReject.id, reason, adminNotes });
       setIsRejectModalOpen(false);
       setApplicationToReject(null);
     }

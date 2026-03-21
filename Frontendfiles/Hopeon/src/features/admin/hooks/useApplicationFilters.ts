@@ -1,18 +1,27 @@
 import { useState, useMemo } from "react";
 import type { OrganizerApplication } from "@/types";
 import type { ApplicationStatus } from "@/enums";
+import { getApplicationStatus } from "@/lib/organizerApplication";
 
 export const useApplicationFilters = (applications: OrganizerApplication[]) => {
-  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | "all">(
+    "all",
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   // Calculate stats
   const stats = useMemo(() => {
     return {
       total: applications.length,
-      pending: applications.filter((app) => app.status === "pending").length,
-      approved: applications.filter((app) => app.status === "approved").length,
-      rejected: applications.filter((app) => app.status === "rejected").length,
+      pending: applications.filter(
+        (app) => getApplicationStatus(app) === "pending",
+      ).length,
+      approved: applications.filter(
+        (app) => getApplicationStatus(app) === "approved",
+      ).length,
+      rejected: applications.filter(
+        (app) => getApplicationStatus(app) === "rejected",
+      ).length,
     };
   }, [applications]);
 
@@ -22,7 +31,9 @@ export const useApplicationFilters = (applications: OrganizerApplication[]) => {
 
     // Filter by status
     if (statusFilter !== "all") {
-      filtered = filtered.filter((app) => app.status === statusFilter);
+      filtered = filtered.filter(
+        (app) => getApplicationStatus(app) === statusFilter,
+      );
     }
 
     // Filter by search query
@@ -33,7 +44,7 @@ export const useApplicationFilters = (applications: OrganizerApplication[]) => {
           app.organizationName.toLowerCase().includes(query) ||
           app.contactEmail?.toLowerCase().includes(query) ||
           app.phoneNumber?.toLowerCase().includes(query) ||
-          app.description.toLowerCase().includes(query)
+          app.description?.toLowerCase().includes(query),
       );
     }
 

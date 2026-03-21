@@ -3,21 +3,40 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FundraisingButton } from "@/components/ui/fundraising-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/routes/routes";
 import { submitApplicationSchema } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, ArrowLeft, ArrowRight, FileText, Shield, Sparkles, UserCheck } from "lucide-react";
-import { useState } from "react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  FileText,
+  Shield,
+  Sparkles,
+  UserCheck,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useOrganizerApplication } from "../hooks/useOrganizerApplication";
 import { buildOrganizerDocuments } from "../hooks/buildOrganizerDocuments";
+import { useLatestOrganizerApplication } from "../hooks/useOrganizerApplicationQueries";
 import type { OrganizerDocuments } from "@/types";
 import { DocumentUploader } from "@/components/shared";
+import OrganizerApplicationStatusCard from "../components/OrganizerApplicationStatusCard";
+import { getApplicationStatus } from "@/lib/organizerApplication";
+
+type ApplicationViewState = "form" | "pending" | "approved" | "rejected";
 
 // Enhanced Zod schema
 // const applicationSchema = z.object({
@@ -38,11 +57,19 @@ import { DocumentUploader } from "@/components/shared";
 export default function Applyfororganizer() {
   // CHANGED: Use the hook instead of useContext
   const { user, isAuthenticated } = useAuth();
-  
+
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [applicationId, setApplicationId] = useState<string | null>(null);
-  
+  const [isReapplying, setIsReapplying] = useState(false);
+
+  const {
+    latestApplication,
+    isLoading: isApplicationsLoading,
+    isError: isApplicationsError,
+    error: applicationsError,
+  } = useLatestOrganizerApplication();
+
   // FIXED: Proper type and correct naming
   const [documents, setDocuments] = useState<OrganizerDocuments>({
     governmentId: null,
@@ -71,8 +98,36 @@ export default function Applyfororganizer() {
       setStep(step);
       setApplicationId(id);
     },
-    onSuccessRedirect: () => navigate(ROUTES.DonorHomepage),
+    onSuccessRedirect: () =>
+      navigate(ROUTES.APPLY_ORGANIZER, { replace: true }),
   });
+
+  const applicationViewState = useMemo<ApplicationViewState>(() => {
+    if (!latestApplication || isReapplying) {
+      return "form";
+    }
+
+    const status = getApplicationStatus(latestApplication);
+
+    if (status === "pending") {
+      return "pending";
+    }
+
+    if (status === "approved") {
+      return "approved";
+    }
+
+    if (status === "rejected") {
+      return "rejected";
+    }
+
+    return "form";
+  }, [latestApplication, isReapplying]);
+
+  const shouldShowPendingStatus = applicationViewState === "pending";
+  const shouldShowApprovedStatus = applicationViewState === "approved";
+  const shouldShowRejectedStatus = applicationViewState === "rejected";
+  const shouldShowForm = applicationViewState === "form";
 
   // FIXED: Proper typing for form values
   const onSubmitBasicInfo = (values: any) => {
@@ -85,7 +140,7 @@ export default function Applyfororganizer() {
       website: values.website || undefined,
       organizationType: values.organizationType,
     };
-    
+
     applyMutation.mutate(applicationData);
   };
 
@@ -120,84 +175,120 @@ export default function Applyfororganizer() {
     );
   }
 
+  if (isApplicationsLoading) {
+    return (
+      <div className="min-h-screen from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading application status...</p>
+        </div>
+      </div>
+    );
+  }
 
+  if (
+    isApplicationsError &&
+    (applicationsError as any)?.response?.status !== 404
+  ) {
+    return (
+      <div className="min-h-screen from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center px-4">
+        <div className="max-w-lg w-full bg-red-50 border border-red-200 rounded-xl p-5">
+          <h2 className="text-lg font-semibold text-red-900 mb-1">
+            Unable to load your application status
+          </h2>
+          <p className="text-red-700 text-sm">
+            {(applicationsError as any)?.message ||
+              "Something went wrong while loading your organizer application."}
+          </p>
+          <FundraisingButton
+            type="button"
+            variant="outline-support"
+            className="mt-4"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </FundraisingButton>
+        </div>
+      </div>
+    );
+  }
 
   // Submit basic application
-//   const applicationMutation = useMutation({
-//     mutationFn: donorOrganizerAPI.applyAsOrganizer,
-//     onSuccess: (data) => {
-//       setApplicationId(data.applicationId);
-//       setStep(2); // Move to documents step
-//       toast.success("✅ Basic info saved! Now upload your verification documents to submit your application.");
-//     },
-//     onError: (err) => {
-//       toast.error(err.message || "Failed to submit application");
-//     },
-//   });
+  //   const applicationMutation = useMutation({
+  //     mutationFn: donorOrganizerAPI.applyAsOrganizer,
+  //     onSuccess: (data) => {
+  //       setApplicationId(data.applicationId);
+  //       setStep(2); // Move to documents step
+  //       toast.success("✅ Basic info saved! Now upload your verification documents to submit your application.");
+  //     },
+  //     onError: (err) => {
+  //       toast.error(err.message || "Failed to submit application");
+  //     },
+  //   });
 
-//   // Upload documents
-//   const documentsMutation = useMutation({
-//     mutationFn: ({applicationId, formdata}) => donorOrganizerAPI.OrganizerDocument(applicationId,formdata),
- 
-//     onSuccess: () => {
-//       toast.success(
-//         "🎉 Application submitted successfully! Your application is now pending admin review. We'll notify you within 2-3 business days.",
-//         { duration: 6000 }
-//       );
-//       // Redirect to home after a brief delay
-//       setTimeout(() => {
-//         navigate(ROUTES.HOME);
-//       }, 2000);
-//     },
-//     onError: (err) => {
-//       toast.error(err.message || "Failed to upload documents");
-//     },
-//   });
+  //   // Upload documents
+  //   const documentsMutation = useMutation({
+  //     mutationFn: ({applicationId, formdata}) => donorOrganizerAPI.OrganizerDocument(applicationId,formdata),
 
-//   const onSubmitBasicInfo = (values) => {
-//     applicationMutation.mutate(values);
-//   };
+  //     onSuccess: () => {
+  //       toast.success(
+  //         "🎉 Application submitted successfully! Your application is now pending admin review. We'll notify you within 2-3 business days.",
+  //         { duration: 6000 }
+  //       );
+  //       // Redirect to home after a brief delay
+  //       setTimeout(() => {
+  //         navigate(ROUTES.HOME);
+  //       }, 2000);
+  //     },
+  //     onError: (err) => {
+  //       toast.error(err.message || "Failed to upload documents");
+  //     },
+  //   });
 
-//   const onSubmitDocuments = () => {
-//     // Validate required documents
-//     if (!documents.governmentId || !documents.selfieWithId) {
-//       toast.error("Please upload required identity documents (Government ID and Selfie with ID)");
-//       return;
-//     }
+  //   const onSubmitBasicInfo = (values) => {
+  //     applicationMutation.mutate(values);
+  //   };
 
-//     // Create FormData
-//     const formData = new FormData();
-    
-//     if (documents.governmentId) {
-//       formData.append("governmentId", documents.governmentId);
-//     }
-//     if (documents.selfieWithId) {
-//       formData.append("selfieWithId", documents.selfieWithId);
-//     }
-//     if (documents.registrationCertificate) {
-//       formData.append("registrationCertificate", documents.registrationCertificate);
-//     }
-//     if (documents.taxId) {
-//       formData.append("taxId", documents.taxId);
-//     }
-//     if (documents.addressProof) {
-//       formData.append("addressProof", documents.addressProof);
-//     }
+  //   const onSubmitDocuments = () => {
+  //     // Validate required documents
+  //     if (!documents.governmentId || !documents.selfieWithId) {
+  //       toast.error("Please upload required identity documents (Government ID and Selfie with ID)");
+  //       return;
+  //     }
 
-//     // Upload documents
-//     documentsMutation.mutate(formData);
-//   };
+  //     // Create FormData
+  //     const formData = new FormData();
 
-//   if (loading) {
-//     return (
-//       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
-//         <div className="text-center">
-//           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-//           <p className="text-gray-600">Loading...</p>
-//         </div>
-//       </div>
-//     );
-//   }
+  //     if (documents.governmentId) {
+  //       formData.append("governmentId", documents.governmentId);
+  //     }
+  //     if (documents.selfieWithId) {
+  //       formData.append("selfieWithId", documents.selfieWithId);
+  //     }
+  //     if (documents.registrationCertificate) {
+  //       formData.append("registrationCertificate", documents.registrationCertificate);
+  //     }
+  //     if (documents.taxId) {
+  //       formData.append("taxId", documents.taxId);
+  //     }
+  //     if (documents.addressProof) {
+  //       formData.append("addressProof", documents.addressProof);
+  //     }
+
+  //     // Upload documents
+  //     documentsMutation.mutate(formData);
+  //   };
+
+  //   if (loading) {
+  //     return (
+  //       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+  //         <div className="text-center">
+  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+  //           <p className="text-gray-600">Loading...</p>
+  //         </div>
+  //       </div>
+  //     );
+  //   }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
@@ -221,31 +312,93 @@ export default function Applyfororganizer() {
           </p>
         </div>
 
-        {/* Progress Indicator */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center gap-4">
-            <div className={`flex items-center gap-2 ${step >= 1 ? "text-blue-600" : "text-gray-400"}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                step >= 1 ? "bg-blue-600 text-white" : "bg-gray-300"
-              }`}>
-                1
-              </div>
-              <span className="font-medium">Basic Info</span>
-            </div>
-            <ArrowRight className="text-gray-400" />
-            <div className={`flex items-center gap-2 ${step >= 2 ? "text-blue-600" : "text-gray-400"}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                step >= 2 ? "bg-blue-600 text-white" : "bg-gray-300"
-              }`}>
-                2
-              </div>
-              <span className="font-medium">Documents</span>
-            </div>
+        {shouldShowPendingStatus && latestApplication && (
+          <div className="mb-8">
+            <OrganizerApplicationStatusCard
+              application={latestApplication}
+              onPrimaryAction={() => navigate(ROUTES.APPLY_ORGANIZER)}
+              primaryActionLabel="Refresh Status"
+            />
           </div>
-        </div>
+        )}
+
+        {shouldShowApprovedStatus && latestApplication && (
+          <div className="mb-8">
+            <OrganizerApplicationStatusCard
+              application={latestApplication}
+              onPrimaryAction={() =>
+                navigate(
+                  user?.role === "organizer"
+                    ? ROUTES.ORGANIZER_DASHBOARD
+                    : ROUTES.DONOR_DASHBOARD,
+                )
+              }
+              primaryActionLabel={
+                user?.role === "organizer"
+                  ? "Go to Organizer Dashboard"
+                  : "Go to Dashboard"
+              }
+            />
+          </div>
+        )}
+
+        {shouldShowRejectedStatus && latestApplication && (
+          <div className="mb-8">
+            <OrganizerApplicationStatusCard
+              application={latestApplication}
+              onReapply={() => {
+                setIsReapplying(true);
+                setStep(1);
+                setApplicationId(null);
+                setDocuments({
+                  governmentId: null,
+                  selfieWithId: null,
+                  registrationCertificate: null,
+                  taxId: null,
+                  addressProof: null,
+                });
+              }}
+            />
+          </div>
+        )}
+
+        {shouldShowForm && (
+          <>
+            {/* Progress Indicator */}
+            <div className="mb-8">
+              <div className="flex items-center justify-center gap-4">
+                <div
+                  className={`flex items-center gap-2 ${step >= 1 ? "text-blue-600" : "text-gray-400"}`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      step >= 1 ? "bg-blue-600 text-white" : "bg-gray-300"
+                    }`}
+                  >
+                    1
+                  </div>
+                  <span className="font-medium">Basic Info</span>
+                </div>
+                <ArrowRight className="text-gray-400" />
+                <div
+                  className={`flex items-center gap-2 ${step >= 2 ? "text-blue-600" : "text-gray-400"}`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      step >= 2 ? "bg-blue-600 text-white" : "bg-gray-300"
+                    }`}
+                  >
+                    2
+                  </div>
+                  <span className="font-medium">Documents</span>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Step 1: Basic Information */}
-        {step === 1 && (
+        {shouldShowForm && step === 1 && (
           <Card className="bg-white shadow-xl border-0 overflow-hidden">
             <CardHeader className="bg-linear-to-r from-purple-600 to-indigo-600 text-white">
               <CardTitle className="flex items-center gap-3 text-xl">
@@ -277,10 +430,20 @@ export default function Applyfororganizer() {
                   </div>
 
                   <div>
-                    <Label htmlFor="organizationType">Organization Type *</Label>
+                    <Label htmlFor="organizationType">
+                      Organization Type *
+                    </Label>
                     <Select
                       onValueChange={(value) =>
-                        form.setValue("organizationType", value as "nonprofit" | "charity" | "individual" | "business" | "other")
+                        form.setValue(
+                          "organizationType",
+                          value as
+                            | "nonprofit"
+                            | "charity"
+                            | "individual"
+                            | "business"
+                            | "other",
+                        )
                       }
                       defaultValue="other"
                     >
@@ -288,10 +451,16 @@ export default function Applyfororganizer() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="nonprofit">Non-Profit Organization</SelectItem>
-                        <SelectItem value="charity">Registered Charity</SelectItem>
+                        <SelectItem value="nonprofit">
+                          Non-Profit Organization
+                        </SelectItem>
+                        <SelectItem value="charity">
+                          Registered Charity
+                        </SelectItem>
                         <SelectItem value="individual">Individual</SelectItem>
-                        <SelectItem value="business">Social Enterprise/Business</SelectItem>
+                        <SelectItem value="business">
+                          Social Enterprise/Business
+                        </SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
@@ -368,10 +537,13 @@ export default function Applyfororganizer() {
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
                     <div className="text-sm text-blue-800">
-                      <p className="font-medium mb-1">Next Step: Document Verification</p>
+                      <p className="font-medium mb-1">
+                        Next Step: Document Verification
+                      </p>
                       <p>
-                        After submitting this form, you'll need to upload verification documents including:
-                        Government ID, Selfie with ID, and other supporting documents.
+                        After submitting this form, you'll need to upload
+                        verification documents including: Government ID, Selfie
+                        with ID, and other supporting documents.
                       </p>
                     </div>
                   </div>
@@ -395,7 +567,7 @@ export default function Applyfororganizer() {
         )}
 
         {/* Step 2: Document Upload */}
-        {step === 2 && (
+        {shouldShowForm && step === 2 && (
           <Card className="bg-white shadow-xl border-0 overflow-hidden">
             <CardHeader className="bg-linear-to-r from-green-600 to-emerald-600 text-white">
               <CardTitle className="flex items-center gap-3 text-xl">
@@ -408,8 +580,17 @@ export default function Applyfororganizer() {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
                   <div className="text-sm text-amber-800">
-                    <p className="font-medium mb-1">⚡ Final Step - Required Documents</p>
-                    <p>Upload clear, legible copies of your documents. <strong>Government ID and Selfie with ID are required.</strong> Once you submit, your application will be sent to admin for review.</p>
+                    <p className="font-medium mb-1">
+                      ⚡ Final Step - Required Documents
+                    </p>
+                    <p>
+                      Upload clear, legible copies of your documents.{" "}
+                      <strong>
+                        Government ID and Selfie with ID are required.
+                      </strong>{" "}
+                      Once you submit, your application will be sent to admin
+                      for review.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -420,13 +601,13 @@ export default function Applyfororganizer() {
                   <UserCheck className="h-5 w-5 text-purple-600" />
                   Identity Verification (Required)
                 </h3>
-                
+
                 <DocumentUploader
                   label="Government-Issued ID"
                   description="Passport, Driver's License, or National ID Card"
                   required
-                  onFileSelect={(file) => 
-                    setDocuments(prev => ({ ...prev, governmentId: file }))
+                  onFileSelect={(file) =>
+                    setDocuments((prev) => ({ ...prev, governmentId: file }))
                   }
                 />
 
@@ -434,8 +615,8 @@ export default function Applyfororganizer() {
                   label="Selfie with ID"
                   description="Take a photo of yourself holding your ID next to your face"
                   required
-                  onFileSelect={(file) => 
-                    setDocuments(prev => ({ ...prev, selfieWithId: file }))
+                  onFileSelect={(file) =>
+                    setDocuments((prev) => ({ ...prev, selfieWithId: file }))
                   }
                 />
               </div>
@@ -446,28 +627,31 @@ export default function Applyfororganizer() {
                   <FileText className="h-5 w-5 text-blue-600" />
                   Organization Documents (Optional but Recommended)
                 </h3>
-                
+
                 <DocumentUploader
                   label="Registration Certificate"
                   description="For nonprofits/charities: Official registration documents"
-                  onFileSelect={(file) => 
-                    setDocuments(prev => ({ ...prev, registrationCertificate: file }))
+                  onFileSelect={(file) =>
+                    setDocuments((prev) => ({
+                      ...prev,
+                      registrationCertificate: file,
+                    }))
                   }
                 />
 
                 <DocumentUploader
                   label="Tax ID / EIN"
                   description="Tax identification number document"
-                  onFileSelect={(file) => 
-                    setDocuments(prev => ({ ...prev, taxId: file }))
+                  onFileSelect={(file) =>
+                    setDocuments((prev) => ({ ...prev, taxId: file }))
                   }
                 />
 
                 <DocumentUploader
                   label="Address Proof"
                   description="Utility bill or bank statement (within last 3 months)"
-                  onFileSelect={(file) => 
-                    setDocuments(prev => ({ ...prev, addressProof: file }))
+                  onFileSelect={(file) =>
+                    setDocuments((prev) => ({ ...prev, addressProof: file }))
                   }
                 />
               </div>
@@ -492,7 +676,11 @@ export default function Applyfororganizer() {
                   onClick={onSubmitDocuments}
                   loading={documentMutation.isPending}
                   loadingText="Uploading..."
-                  disabled={documentMutation.isPending || !documents.governmentId || !documents.selfieWithId}
+                  disabled={
+                    documentMutation.isPending ||
+                    !documents.governmentId ||
+                    !documents.selfieWithId
+                  }
                   className="flex-1"
                 >
                   <Sparkles className="h-5 w-5" />

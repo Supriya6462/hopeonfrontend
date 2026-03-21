@@ -3,6 +3,7 @@ export { buildOrganizerDocuments } from "./buildOrganizerDocuments";
 export {
   useMyApplications,
   useGetDraftApplication,
+  useLatestOrganizerApplication,
 } from "./useOrganizerApplicationQueries";
 export {
   useDonorDonations,

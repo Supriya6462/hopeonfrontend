@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { ROUTES } from "@/routes/routes";
 import type { Role } from "@/enums";
+import { clearAuthStorage, isTokenExpired } from "@/lib/auth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,13 +15,23 @@ interface ProtectedRouteProps {
  * Note: Organizers can access both donor and organizer routes
  * SECURITY: Revoked organizers are blocked from organizer routes
  */
-export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+export default function ProtectedRoute({
+  children,
+  allowedRoles,
+}: ProtectedRouteProps) {
   const location = useLocation();
   const token = localStorage.getItem("authToken");
   const userStr = localStorage.getItem("user");
 
   // Not authenticated - redirect to login
   if (!token || !userStr) {
+    return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />;
+  }
+
+  // Token exists but has already expired
+  if (isTokenExpired(token, 5000)) {
+    clearAuthStorage();
+    window.dispatchEvent(new Event("auth-change"));
     return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />;
   }
 
@@ -40,9 +51,16 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
       // Check if trying to access organizer routes
       if (location.pathname.startsWith("/organizer")) {
         // Redirect to donor homepage with error message
-        return <Navigate to={ROUTES.HOME} state={{ 
-          error: "Your organizer access has been revoked. Please contact support." 
-        }} replace />;
+        return (
+          <Navigate
+            to={ROUTES.HOME}
+            state={{
+              error:
+                "Your organizer access has been revoked. Please contact support.",
+            }}
+            replace
+          />
+        );
       }
       // Allow access to donor routes
       if (allowedRoles && allowedRoles.includes("donor")) {
@@ -52,7 +70,10 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
 
     // Organizers can access both donor and organizer routes (if not revoked)
     if (userRole === "organizer" && !isOrganizerRevoked) {
-      if (allowedRoles && (allowedRoles.includes("donor") || allowedRoles.includes("organizer"))) {
+      if (
+        allowedRoles &&
+        (allowedRoles.includes("donor") || allowedRoles.includes("organizer"))
+      ) {
         return <>{children}</>;
       }
     }
@@ -75,8 +96,8 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     return <>{children}</>;
   } catch {
     // Invalid user data - clear storage and redirect to login
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
+    clearAuthStorage();
+    window.dispatchEvent(new Event("auth-change"));
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 }

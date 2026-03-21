@@ -3,6 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/routes/routes";
+import { useLatestOrganizerApplication } from "../hooks/useOrganizerApplicationQueries";
+import OrganizerApplicationStatusCard from "../components/OrganizerApplicationStatusCard";
 
 interface UserData {
   name: string;
@@ -15,7 +19,10 @@ interface UserData {
  * DonorProfile - Profile management page for donors
  */
 export default function DonorProfile() {
+  const navigate = useNavigate();
   const [user, setUser] = useState<UserData | null>(null);
+  const { latestApplication, isLoading: isApplicationLoading } =
+    useLatestOrganizerApplication();
 
   useEffect(() => {
     try {
@@ -41,10 +48,16 @@ export default function DonorProfile() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-        <p className="text-gray-600 mt-2">
-          Manage your account information
-        </p>
+        <p className="text-gray-600 mt-2">Manage your account information</p>
       </div>
+
+      {!isApplicationLoading && latestApplication && (
+        <OrganizerApplicationStatusCard
+          application={latestApplication}
+          onPrimaryAction={() => navigate(ROUTES.APPLY_ORGANIZER)}
+          primaryActionLabel="View Organizer Application"
+        />
+      )}
 
       {/* Profile Picture */}
       <Card>

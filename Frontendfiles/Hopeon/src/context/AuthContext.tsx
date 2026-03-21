@@ -1,4 +1,16 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
+import {
+  clearAuthStorage,
+  getMsUntilTokenExpiry,
+  isTokenExpired,
+} from "@/lib/auth";
 
 interface User {
   _id: string;
@@ -26,13 +38,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userStr = localStorage.getItem("user");
       const token = localStorage.getItem("authToken");
+
       if (userStr && token) {
+        if (isTokenExpired(token, 5000)) {
+          clearAuthStorage();
+          setUser(null);
+          return;
+        }
+
         setUser(JSON.parse(userStr));
       } else {
         setUser(null);
       }
     } catch (error) {
       console.error("Failed to load user:", error);
+      clearAuthStorage();
       setUser(null);
     }
   }, []);
@@ -43,10 +63,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for storage changes (other tabs)
     window.addEventListener("storage", loadUser);
-    
+
     // Listen for custom auth events (same tab)
     window.addEventListener("auth-change", loadUser);
-    
+
     return () => {
       window.removeEventListener("storage", loadUser);
       window.removeEventListener("auth-change", loadUser);
@@ -54,6 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadUser]);
 
   const login = useCallback((token: string, userData: User) => {
+    if (isTokenExpired(token, 5000)) {
+      clearAuthStorage();
+      setUser(null);
+      window.dispatchEvent(new Event("auth-change"));
+      return;
+    }
+
     localStorage.setItem("authToken", token);
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
@@ -62,13 +89,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
-    localStorage.removeItem("activeView");
+    clearAuthStorage();
     setUser(null);
     // Dispatch custom event for same-tab updates
     window.dispatchEvent(new Event("auth-change"));
   }, []);
+
+  // Auto-logout when token expires, regardless of role
+  useEffect(() => {
+    if (!user) return;
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setUser(null);
+      return;
+    }
+
+    const timeoutMs = getMsUntilTokenExpiry(token);
+    if (timeoutMs <= 0) {
+      logout();
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      logout();
+    }, timeoutMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [user, logout]);
 
   const refreshUser = useCallback(() => {
     loadUser();

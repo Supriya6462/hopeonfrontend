@@ -1,14 +1,19 @@
 import { Heart, TrendingUp, Calendar, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/routes/routes";
+import { useLatestOrganizerApplication } from "../hooks/useOrganizerApplicationQueries";
+import OrganizerApplicationStatusCard from "../components/OrganizerApplicationStatusCard";
 
 /**
  * DonorDashboard - Main dashboard for donors
  * Shows donation stats and quick actions
  */
 export default function DonorDashboard() {
+  const navigate = useNavigate();
+  const { latestApplication, isLoading } = useLatestOrganizerApplication();
+
   const getUserName = () => {
     try {
       const userStr = localStorage.getItem("user");
@@ -33,6 +38,14 @@ export default function DonorDashboard() {
           Here's an overview of your donation activity
         </p>
       </div>
+
+      {!isLoading && latestApplication && (
+        <OrganizerApplicationStatusCard
+          application={latestApplication}
+          onPrimaryAction={() => navigate(ROUTES.APPLY_ORGANIZER)}
+          primaryActionLabel="View Organizer Application"
+        />
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
