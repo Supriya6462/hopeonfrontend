@@ -18,8 +18,8 @@ export const ROUTES = {
   CAMPAIGN_DETAILS: "/campaigns/:id",
 
   // Donor Routes (Protected)
-  DonorHomepage:"/donor/homepage",
-  DonorAboutus:"/donor/aboutus",
+  DonorHomepage: "/donor/homepage",
+  DonorAboutus: "/donor/aboutus",
   DONOR_DASHBOARD: "/donor/dashboard",
   DONOR_DONATIONS: "/donor/donations",
   DONOR_PROFILE: "/donor/profile",
@@ -30,9 +30,9 @@ export const ROUTES = {
   ORGANIZER_CAMPAIGNS: "/organizer/campaigns",
   ORGANIZER_CREATE_CAMPAIGN: "/organizer/campaigns/create",
   ORGANIZER_EDIT_CAMPAIGN: "/organizer/campaigns/:id/edit",
+  ORGANIZER_CAMPAIGN_INSIGHTS: "/organizer/campaigns/:id/insights",
   ORGANIZER_WITHDRAWALS: "/organizer/withdrawals",
   ORGANIZER_PROFILE: "/organizer/profile",
- 
 
   // Admin Routes
   ADMIN_DASHBOARD: "/admin/dashboard",
@@ -41,8 +41,8 @@ export const ROUTES = {
   ADMIN_ORGANIZERS: "/admin/organizers",
   ADMIN_DONATIONS: "/admin/donations",
   ADMIN_WITHDRAWALS: "/admin/withdrawals",
-  ADMIN_APPLICATIONS:"/admin/applications",
-  ADMIN_ORGANIZER_MANAGEMENT:"/admin/organizermanagement",
+  ADMIN_APPLICATIONS: "/admin/applications",
+  ADMIN_ORGANIZER_MANAGEMENT: "/admin/organizermanagement",
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

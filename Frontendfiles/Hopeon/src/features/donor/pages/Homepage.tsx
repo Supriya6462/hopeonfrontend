@@ -1,27 +1,86 @@
-import { useState } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowRight, Heart, Sparkles, Target, TrendingUp, Users } from "lucide-react";
+import {
+  ArrowRight,
+  Heart,
+  Sparkles,
+  Target,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { FundraisingButton } from "@/components/ui/fundraising-button";
 import CampaignCard from "@/components/CampaignCard";
+import { publicCampaignAPI } from "@/features/api";
 
 interface Campaign {
   _id: string;
   title: string;
-  imageURL: string;
+  imageURL?: string;
+  images?: string[];
   target: number;
   raised: number;
+  totalRaised?: number;
+  currentAmount?: number;
   category?: string;
   urgency?: "high" | "medium" | "low";
   daysLeft?: number;
 }
 
+function extractCampaigns(data: unknown): Campaign[] {
+  const root = (data ?? {}) as Record<string, any>;
+  const candidates = [
+    root,
+    root.data,
+    root.result,
+    root.data?.data,
+    root.data?.result,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      return candidate as Campaign[];
+    }
+
+    if (Array.isArray(candidate?.campaigns)) {
+      return candidate.campaigns as Campaign[];
+    }
+
+    if (Array.isArray(candidate?.data?.campaigns)) {
+      return candidate.data.campaigns as Campaign[];
+    }
+  }
+
+  return [];
+}
+
+const getRaisedAmount = (campaign: Campaign) =>
+  campaign.raised ?? campaign.totalRaised ?? campaign.currentAmount ?? 0;
+
 export default function Homepage() {
-  const [campaigns] = useState<Campaign[]>([]);
-  const [isLoading] = useState(false);
-  const [error] = useState<string | null>(null);
+  const campaignsQuery = useQuery({
+    queryKey: ["publicCampaigns", "homepage-featured"],
+    queryFn: () =>
+      publicCampaignAPI.getAllCampaigns({
+        isClosed: false,
+        limit: 6,
+      }),
+    staleTime: 30_000,
+  });
+
+  const campaigns = useMemo(
+    () => extractCampaigns(campaignsQuery.data),
+    [campaignsQuery.data],
+  );
+  const isLoading = campaignsQuery.isLoading;
+  const error = campaignsQuery.isError
+    ? (campaignsQuery.error as any)?.response?.data?.message ||
+      (campaignsQuery.error as any)?.message ||
+      "Unable to load campaigns"
+    : null;
 
   return (
     <div className="relative w-full">
@@ -55,9 +114,9 @@ export default function Homepage() {
                   </span>
                 </h1>
                 <p className="text-xl text-blue-100 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-                  Help communities gain access to clean water, quality education,
-                  and healthcare. Your small act of giving can change someone's
-                  entire world.
+                  Help communities gain access to clean water, quality
+                  education, and healthcare. Your small act of giving can change
+                  someone's entire world.
                 </p>
               </div>
 
@@ -181,7 +240,6 @@ export default function Homepage() {
         </div>
       </div>
 
-
       {/* Featured Campaigns Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
@@ -228,9 +286,13 @@ export default function Homepage() {
                     key={campaign._id}
                     id={campaign._id}
                     title={campaign.title}
-                    imageSrc={campaign.imageURL}
+                    imageSrc={
+                      campaign.images?.[0] ||
+                      campaign.imageURL ||
+                      "/placeholder.svg"
+                    }
                     target={campaign.target}
-                    raised={campaign.raised || 0}
+                    raised={getRaisedAmount(campaign)}
                   />
                 ))}
               </div>

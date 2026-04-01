@@ -202,7 +202,7 @@ export default function Applyfororganizer() {
           </p>
           <FundraisingButton
             type="button"
-            variant="outline-support"
+            variant="outline-trust"
             className="mt-4"
             onClick={() => window.location.reload()}
           >

@@ -24,6 +24,7 @@ export const useOrganizerWithdrawalActions = () => {
 
   return {
     createWithdrawal: createMutation.mutate,
+    createWithdrawalAsync: createMutation.mutateAsync,
     isCreating: createMutation.isPending,
     createError: createMutation.error,
   };

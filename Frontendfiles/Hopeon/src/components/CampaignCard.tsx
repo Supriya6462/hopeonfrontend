@@ -11,7 +11,13 @@ interface CampaignCardProps {
   raised: number;
 }
 
-export default function CampaignCard({ id, title, imageSrc, target, raised }: CampaignCardProps) {
+export default function CampaignCard({
+  id,
+  title,
+  imageSrc,
+  target,
+  raised,
+}: CampaignCardProps) {
   const percent = useMemo(() => {
     if (target <= 0) return 0;
     return Math.min(100, Math.round((raised / target) * 100));
@@ -28,7 +34,7 @@ export default function CampaignCard({ id, title, imageSrc, target, raised }: Ca
         />
 
         {/* Progress Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+        <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent p-4">
           <div className="flex items-center gap-2 text-white text-sm">
             <TrendingUp className="h-4 w-4" />
             <span className="font-medium">{percent}% funded</span>
@@ -49,11 +55,11 @@ export default function CampaignCard({ id, title, imageSrc, target, raised }: Ca
           <div className="relative">
             <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
+                className="bg-linear-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
                 style={{ width: `${percent}%` }}
               >
                 {/* Shimmer Effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
               </div>
             </div>
             <div
@@ -88,7 +94,7 @@ export default function CampaignCard({ id, title, imageSrc, target, raised }: Ca
 
         {/* Action Button */}
         <div className="pt-2">
-          <Link to={`/donate/${id}`} className="block">
+          <Link to={`/campaigns/${id}`} className="block">
             <FundraisingButton size="lg" fullWidth className="group">
               <Heart className="h-5 w-5 group-hover:scale-110 transition-transform" />
               Support This Cause

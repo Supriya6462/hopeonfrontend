@@ -38,8 +38,18 @@ export const organizerCampaignAPI = {
 
   // Get own campaigns
   getMyCampaigns: async (params?: CampaignFilters) => {
-    const response = await api.get("/api/campaigns", { params });
-    return response.data;
+    try {
+      const response = await api.get("/api/campaigns/my-campaigns", { params });
+      return response.data;
+    } catch (error: any) {
+      // Backward compatibility for environments that still expose only /campaigns.
+      if (error?.response?.status === 404) {
+        const fallbackResponse = await api.get("/api/campaigns", { params });
+        return fallbackResponse.data;
+      }
+
+      throw error;
+    }
   },
 
   // Get single campaign details
@@ -60,7 +70,9 @@ export const organizerWithdrawalAPI = {
 
   // Get own withdrawal requests
   getMyWithdrawals: async (params?: WithdrawalFilters) => {
-    const response = await api.get("/api/withdrawals/my-withdrawals", { params });
+    const response = await api.get("/api/withdrawals/my-withdrawals", {
+      params,
+    });
     return response.data;
   },
 
@@ -77,7 +89,7 @@ export const organizerDonationAPI = {
   // Get donations for organizer's campaigns
   getCampaignDonations: async (
     campaignId: string,
-    params?: { page?: number; limit?: number }
+    params?: { page?: number; limit?: number },
   ) => {
     const response = await api.get(`/api/donations/campaign/${campaignId}`, {
       params,

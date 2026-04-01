@@ -23,13 +23,27 @@ import DonorProfile from "@/features/donor/pages/Profile";
 
 // Organizer Pages
 import OrganizerDashboard from "@/features/organizer/pages/Dashboard";
+import CreateCampaign from "@/features/organizer/pages/CreateCampaign";
+import OrganizerCampaigns from "@/features/organizer/pages/Campaigns";
+import EditCampaign from "@/features/organizer/pages/EditCampaign";
+import CampaignInsights from "@/features/organizer/pages/CampaignInsights";
+import OrganizerWithdrawals from "@/features/organizer/pages/Withdrawals";
 
 // Admin Pages
 import AdminDashboard from "@/features/admin/pages/Dashboard";
-import { Adminkycverification, Adminorganizermanagement } from "@/features/admin/pages";
+import {
+  Adminkycverification,
+  Adminorganizermanagement,
+} from "@/features/admin/pages";
 
 import { ROUTES } from "./routes";
-import { ApplyOrganizer, DonorAboutus, DonorHomepage } from "@/features/donor/pages";
+import {
+  DonorCampaignDetails,
+  ApplyOrganizer,
+  DonorAboutus,
+  DonorDonate,
+  DonorHomepage,
+} from "@/features/donor/pages";
 import { PublicLayout } from "@/layouts";
 
 /**
@@ -53,6 +67,14 @@ const routesConfig: RouteObject[] = [
       {
         path: "aboutus",
         element: <DonorAboutus />,
+      },
+      {
+        path: "campaigns",
+        element: <DonorDonate />,
+      },
+      {
+        path: "campaigns/:id",
+        element: <DonorCampaignDetails />,
       },
       // Auth pages inside PublicLayout
       {
@@ -126,7 +148,7 @@ const routesConfig: RouteObject[] = [
       {
         path: "apply-organizer",
         element: <ApplyOrganizer />,
-      }
+      },
     ],
   },
 
@@ -149,19 +171,23 @@ const routesConfig: RouteObject[] = [
       },
       {
         path: "campaigns",
-        element: <div className="p-4">Campaigns page - Coming soon</div>,
+        element: <OrganizerCampaigns />,
       },
       {
         path: "campaigns/create",
-        element: <div className="p-4">Create Campaign - Coming soon</div>,
+        element: <CreateCampaign />,
       },
       {
         path: "campaigns/:id/edit",
-        element: <div className="p-4">Edit Campaign - Coming soon</div>,
+        element: <EditCampaign />,
+      },
+      {
+        path: "campaigns/:id/insights",
+        element: <CampaignInsights />,
       },
       {
         path: "withdrawals",
-        element: <div className="p-4">Withdrawals - Coming soon</div>,
+        element: <OrganizerWithdrawals />,
       },
       {
         path: "profile",
@@ -197,7 +223,7 @@ const routesConfig: RouteObject[] = [
       },
       {
         path: "organizers",
-        element: <Adminorganizermanagement />
+        element: <Adminorganizermanagement />,
       },
       {
         path: "donations",
@@ -205,12 +231,14 @@ const routesConfig: RouteObject[] = [
       },
       {
         path: "withdrawals",
-        element: <div className="p-4">Withdrawals Management - Coming soon</div>,
+        element: (
+          <div className="p-4">Withdrawals Management - Coming soon</div>
+        ),
       },
       {
         path: "Applications",
-        element: <Adminkycverification /> ,
-      }
+        element: <Adminkycverification />,
+      },
     ],
   },
 
