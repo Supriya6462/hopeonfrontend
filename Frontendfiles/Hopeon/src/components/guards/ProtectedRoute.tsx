@@ -29,75 +29,76 @@ export default function ProtectedRoute({
   }
 
   // Token exists but has already expired
-  if (isTokenExpired(token, 5000)) {
+  if (isTokenExpired(token)) {
     clearAuthStorage();
     window.dispatchEvent(new Event("auth-change"));
     return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />;
   }
 
-  // Parse user and check role
+  let userRole: Role;
+  let isOrganizerRevoked = false;
   try {
     const user = JSON.parse(userStr);
-    const userRole: Role = user.role;
-    const isOrganizerRevoked = user.isOrganizerRevoked || false;
-
-    // Admin has access to everything
-    if (userRole === "admin") {
-      return <>{children}</>;
-    }
-
-    // SECURITY CHECK: Block revoked organizers from organizer routes
-    if (userRole === "organizer" && isOrganizerRevoked) {
-      // Check if trying to access organizer routes
-      if (location.pathname.startsWith("/organizer")) {
-        // Redirect to donor homepage with error message
-        return (
-          <Navigate
-            to={ROUTES.HOME}
-            state={{
-              error:
-                "Your organizer access has been revoked. Please contact support.",
-            }}
-            replace
-          />
-        );
-      }
-      // Allow access to donor routes
-      if (allowedRoles && allowedRoles.includes("donor")) {
-        return <>{children}</>;
-      }
-    }
-
-    // Organizers can access both donor and organizer routes (if not revoked)
-    if (userRole === "organizer" && !isOrganizerRevoked) {
-      if (
-        allowedRoles &&
-        (allowedRoles.includes("donor") || allowedRoles.includes("organizer"))
-      ) {
-        return <>{children}</>;
-      }
-    }
-
-    // If allowedRoles specified, check if user has permission
-    if (allowedRoles && allowedRoles.length > 0) {
-      if (!allowedRoles.includes(userRole)) {
-        // User doesn't have required role - redirect to their own dashboard
-        switch (userRole) {
-          case "organizer":
-            return <Navigate to={ROUTES.ORGANIZER_DASHBOARD} replace />;
-          case "donor":
-          default:
-            return <Navigate to={ROUTES.HOME} replace />;
-        }
-      }
-    }
-
-    // Authenticated and authorized - render children
-    return <>{children}</>;
+    userRole = user.role;
+    isOrganizerRevoked = user.isOrganizerRevoked || false;
   } catch {
     // Invalid user data - clear storage and redirect to login
     clearAuthStorage();
     window.dispatchEvent(new Event("auth-change"));
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
+
+  // Admin has access to everything
+  if (userRole === "admin") {
+    return <>{children}</>;
+  }
+
+  // SECURITY CHECK: Block revoked organizers from organizer routes
+  if (userRole === "organizer" && isOrganizerRevoked) {
+    // Check if trying to access organizer routes
+    if (location.pathname.startsWith("/organizer")) {
+      // Redirect to donor homepage with error message
+      return (
+        <Navigate
+          to={ROUTES.HOME}
+          state={{
+            error:
+              "Your organizer access has been revoked. Please contact support.",
+          }}
+          replace
+        />
+      );
+    }
+    // Allow access to donor routes
+    if (allowedRoles && allowedRoles.includes("donor")) {
+      return <>{children}</>;
+    }
+  }
+
+  // Organizers can access both donor and organizer routes (if not revoked)
+  if (userRole === "organizer" && !isOrganizerRevoked) {
+    if (
+      allowedRoles &&
+      (allowedRoles.includes("donor") || allowedRoles.includes("organizer"))
+    ) {
+      return <>{children}</>;
+    }
+  }
+
+  // If allowedRoles specified, check if user has permission
+  if (allowedRoles && allowedRoles.length > 0) {
+    if (!allowedRoles.includes(userRole)) {
+      // User doesn't have required role - redirect to their own dashboard
+      switch (userRole) {
+        case "organizer":
+          return <Navigate to={ROUTES.ORGANIZER_DASHBOARD} replace />;
+        case "donor":
+        default:
+          return <Navigate to={ROUTES.HOME} replace />;
+      }
+    }
+  }
+
+  // Authenticated and authorized - render children
+  return <>{children}</>;
 }

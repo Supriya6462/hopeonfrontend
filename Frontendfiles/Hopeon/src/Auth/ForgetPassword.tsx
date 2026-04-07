@@ -35,6 +35,7 @@ export default function ForgetPassword() {
       authAPI.requestOtp(email, OtpPurpose.FORGET_PASSWORD),
     onSuccess: (_data, email) => {
       toast.success("Reset code sent to your email");
+      let savedToSession = true;
 
       try {
         sessionStorage.setItem(
@@ -46,19 +47,31 @@ export default function ForgetPassword() {
         );
       } catch (error) {
         console.error("Failed to store reset password data:", error);
+        savedToSession = false;
+      }
+
+      if (!savedToSession) {
+        toast.error(
+          "Could not save reset session. Continue now before refreshing this page.",
+        );
       }
 
       navigate(
         `${ROUTES.OTP_VERIFICATION}?purpose=${OtpPurpose.FORGET_PASSWORD}`,
         {
           replace: true,
+          state: { email },
         },
       );
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const maybeHttpError = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       const message =
-        error?.response?.data?.message ||
-        error?.message ||
+        maybeHttpError.response?.data?.message ||
+        (error instanceof Error ? error.message : undefined) ||
         "Failed to send reset code. Please try again.";
       toast.error(message);
     },

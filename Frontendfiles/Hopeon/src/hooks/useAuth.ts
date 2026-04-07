@@ -2,9 +2,21 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { authAPI } from "@/features/api/publicapi/public.api";
-import type { RegisterInput, LoginInput, AuthResponse } from "@/types";
+import type {
+  RegisterInput,
+  LoginInput,
+  AuthResponse,
+  OtpResponse,
+} from "@/types";
 import { OtpPurpose, type OtpPurposeType } from "@/enums";
 import { ROUTES } from "@/routes/routes";
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return fallback;
+};
 
 /**
  * Custom hook for user registration
@@ -17,6 +29,7 @@ export const useRegister = () => {
     mutationFn: authAPI.register,
     onSuccess: (_data, variables) => {
       toast.success("OTP sent to your email");
+      let savedToSession = true;
 
       // Store registration data in session storage for OTP verification
       try {
@@ -31,13 +44,25 @@ export const useRegister = () => {
         );
       } catch (error) {
         console.error("Failed to store registration data:", error);
+        savedToSession = false;
+      }
+
+      if (!savedToSession) {
+        toast.error(
+          "Could not save verification session. Continue now before refreshing the page.",
+        );
       }
 
       // Navigate to OTP verification page
-      navigate(ROUTES.OTP_VERIFICATION, { replace: true });
+      navigate(ROUTES.OTP_VERIFICATION, {
+        replace: true,
+        state: { email: variables.email },
+      });
     },
     onError: (error) => {
-      toast.error(error.message || "Registration failed. Please try again.");
+      toast.error(
+        getErrorMessage(error, "Registration failed. Please try again."),
+      );
     },
   });
 };
@@ -50,7 +75,7 @@ export const useVerifyOtp = () => {
   const navigate = useNavigate();
 
   return useMutation<
-    AuthResponse,
+    OtpResponse,
     Error,
     {
       email: string;
@@ -80,7 +105,7 @@ export const useVerifyOtp = () => {
     },
     onError: (error) => {
       toast.error(
-        error.message || "OTP verification failed. Please try again.",
+        getErrorMessage(error, "OTP verification failed. Please try again."),
       );
     },
   });
@@ -92,7 +117,7 @@ export const useVerifyOtp = () => {
  */
 export const useResendOtp = () => {
   return useMutation<
-    any,
+    OtpResponse,
     Error,
     { email: string; purpose?: OtpPurposeType; onSuccess?: () => void }
   >({
@@ -108,7 +133,9 @@ export const useResendOtp = () => {
       toast.success("OTP resent to your email");
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to resend OTP. Please try again.");
+      toast.error(
+        getErrorMessage(error, "Failed to resend OTP. Please try again."),
+      );
     },
   });
 };
@@ -153,7 +180,7 @@ export const useLogin = () => {
     },
     onError: (error) => {
       toast.error(
-        error.message || "Login failed. Please check your credentials.",
+        getErrorMessage(error, "Login failed. Please check your credentials."),
       );
     },
   });

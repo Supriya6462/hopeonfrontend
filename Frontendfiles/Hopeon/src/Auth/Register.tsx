@@ -13,7 +13,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { AuthLayout, AuthFormHeader, PasswordInput, LoadingButton } from "@/components/auth";
+import {
+  AuthLayout,
+  AuthFormHeader,
+  PasswordInput,
+  LoadingButton,
+} from "@/components/auth";
 import { useRegister } from "@/hooks";
 import { registerSchema } from "@/validations";
 import { ROUTES } from "@/routes/routes";
@@ -103,7 +108,7 @@ export default function Register() {
                           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                           <Input
                             type="email"
-                            placeholder="Enter you email"
+                            placeholder="Enter your email"
                             className="pl-10 h-12 border-2 border-gray-200 focus:border-emerald-500 rounded-xl"
                             {...field}
                           />
@@ -114,21 +119,23 @@ export default function Register() {
                   )}
                 />
 
-                                {/* Phone number Field */}
+                {/* Phone number Field */}
                 <FormField
                   control={form.control}
                   name="phoneNumber"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">
-                        Phone Number
+                        Phone Number (optional)
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
                           <PhoneCall className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                           <Input
-                            type="number"
-                            placeholder="Enter you Phone number"
+                            type="tel"
+                            inputMode="tel"
+                            autoComplete="tel"
+                            placeholder="Enter your phone number"
                             className="pl-10 h-12 border-2 border-gray-200 focus:border-emerald-500 rounded-xl"
                             {...field}
                           />
@@ -179,21 +186,8 @@ export default function Register() {
                 {/* Terms Notice */}
                 <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
                   <p className="text-sm text-emerald-800">
-                    By creating an account, you agree to our{" "}
-                    <Link
-                      to="/terms"
-                      className="font-medium underline hover:text-emerald-900"
-                    >
-                      Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link
-                      to="/privacy"
-                      className="font-medium underline hover:text-emerald-900"
-                    >
-                      Privacy Policy
-                    </Link>
-                    .
+                    By creating an account, you agree to our terms of service
+                    and privacy policy.
                   </p>
                 </div>
 

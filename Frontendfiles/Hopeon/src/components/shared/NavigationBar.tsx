@@ -35,7 +35,6 @@ import { useRoleContext } from "@/context/RoleContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-
 interface User {
   _id: string;
   name: string;
@@ -64,12 +63,9 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Get active view context (donor or organizer)
-  const { activeView: contextActiveView } = useRoleContext();
-  
-  // Derive activeView from URL to avoid race conditions
-  const activeView = location.pathname.startsWith("/organizer") ? "organizer" : contextActiveView;
+  const { activeView } = useRoleContext();
 
   const confirmLogout = () => {
     onLogout();
@@ -87,7 +83,7 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
   const getNavLinks = (): NavLink[] => {
     const baseLinks: NavLink[] = [
       { name: "Home", path: ROUTES.HOME, icon: Home },
-      { name: "About us", path: ROUTES.ABOUTUS, icon: User2},
+      { name: "About us", path: ROUTES.ABOUTUS, icon: User2 },
       { name: "Campaigns", path: ROUTES.CAMPAIGNS, icon: Heart },
     ];
 
@@ -97,18 +93,38 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
     if (user.role === "admin") {
       return [
         ...baseLinks,
-        { name: "Dashboard", path: ROUTES.ADMIN_DASHBOARD, icon: LayoutDashboard },
+        {
+          name: "Dashboard",
+          path: ROUTES.ADMIN_DASHBOARD,
+          icon: LayoutDashboard,
+        },
         { name: "Users", path: ROUTES.ADMIN_USERS, icon: User },
-        { name: "Manage Campaigns", path: ROUTES.ADMIN_CAMPAIGNS, icon: Settings },
+        {
+          name: "Manage Campaigns",
+          path: ROUTES.ADMIN_CAMPAIGNS,
+          icon: Settings,
+        },
       ];
     }
 
     // Organizer with organizer view active
     if (user.role === "organizer" && activeView === "organizer") {
       return [
-        { name: "Dashboard", path: ROUTES.ORGANIZER_DASHBOARD, icon: LayoutDashboard },
-        { name: "My Campaigns", path: ROUTES.ORGANIZER_CAMPAIGNS, icon: FolderHeart },
-        { name: "Withdrawals", path: ROUTES.ORGANIZER_WITHDRAWALS, icon: Wallet },
+        {
+          name: "Dashboard",
+          path: ROUTES.ORGANIZER_DASHBOARD,
+          icon: LayoutDashboard,
+        },
+        {
+          name: "My Campaigns",
+          path: ROUTES.ORGANIZER_CAMPAIGNS,
+          icon: FolderHeart,
+        },
+        {
+          name: "Withdrawals",
+          path: ROUTES.ORGANIZER_WITHDRAWALS,
+          icon: Wallet,
+        },
       ];
     }
 
@@ -148,7 +164,7 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
                     "flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium",
                     isActivePath(path)
                       ? "bg-white/20 text-white"
-                      : "text-white/80 hover:bg-white/10 hover:text-white"
+                      : "text-white/80 hover:bg-white/10 hover:text-white",
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -215,17 +231,23 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleNavigation(
-                        user.role === "organizer" && activeView === "organizer" 
-                          ? ROUTES.ORGANIZER_PROFILE 
-                          : ROUTES.DONOR_PROFILE
-                      )}
+                      onClick={() =>
+                        handleNavigation(
+                          user.role === "organizer" &&
+                            activeView === "organizer"
+                            ? ROUTES.ORGANIZER_PROFILE
+                            : ROUTES.DONOR_PROFILE,
+                        )
+                      }
                       className="text-white hover:bg-white/10 gap-2"
                     >
                       <User className="h-4 w-4" />
                       {user.name}
                     </Button>
-                    <Dialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+                    <Dialog
+                      open={logoutDialogOpen}
+                      onOpenChange={setLogoutDialogOpen}
+                    >
                       <DialogTrigger asChild>
                         <Button
                           variant="ghost"
@@ -244,7 +266,10 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter className="gap-2">
-                          <Button variant="outline" onClick={() => setLogoutDialogOpen(false)}>
+                          <Button
+                            variant="outline"
+                            onClick={() => setLogoutDialogOpen(false)}
+                          >
                             Cancel
                           </Button>
                           <Button variant="destructive" onClick={confirmLogout}>
@@ -307,7 +332,7 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
                     "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 text-sm font-medium",
                     isActivePath(path)
                       ? "bg-white/20 text-white"
-                      : "text-white/80 hover:bg-white/10 hover:text-white"
+                      : "text-white/80 hover:bg-white/10 hover:text-white",
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -338,7 +363,9 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
               {/* Create Campaign (Mobile) */}
               {user?.role === "organizer" && activeView === "organizer" && (
                 <Button
-                  onClick={() => handleNavigation(ROUTES.ORGANIZER_CREATE_CAMPAIGN)}
+                  onClick={() =>
+                    handleNavigation(ROUTES.ORGANIZER_CREATE_CAMPAIGN)
+                  }
                   className="w-full mt-2 bg-amber-500 hover:bg-amber-600 text-white gap-2"
                 >
                   <Plus className="h-5 w-5" />
@@ -365,11 +392,14 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
                   <>
                     <Button
                       variant="ghost"
-                      onClick={() => handleNavigation(
-                        user.role === "organizer" && activeView === "organizer" 
-                          ? ROUTES.ORGANIZER_PROFILE 
-                          : ROUTES.DONOR_PROFILE
-                      )}
+                      onClick={() =>
+                        handleNavigation(
+                          user.role === "organizer" &&
+                            activeView === "organizer"
+                            ? ROUTES.ORGANIZER_PROFILE
+                            : ROUTES.DONOR_PROFILE,
+                        )
+                      }
                       className="w-full justify-start text-white hover:bg-white/10 gap-3"
                     >
                       <User className="h-5 w-5" />
@@ -386,7 +416,10 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
                   </>
                 ) : (
                   <>
-                    <Link to={ROUTES.LOGIN} onClick={() => setMobileMenuOpen(false)}>
+                    <Link
+                      to={ROUTES.LOGIN}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       <Button
                         variant="ghost"
                         className="w-full justify-start text-white hover:bg-white/10 gap-3"
@@ -395,7 +428,10 @@ export default function NavigationBar({ user, onLogout }: NavigationBarProps) {
                         Login
                       </Button>
                     </Link>
-                    <Link to={ROUTES.REGISTER} onClick={() => setMobileMenuOpen(false)}>
+                    <Link
+                      to={ROUTES.REGISTER}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       <Button className="w-full bg-amber-500 hover:bg-amber-600 text-white gap-3">
                         <UserPlus2 className="h-5 w-5" />
                         Register

@@ -1,11 +1,15 @@
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { usePasswordToggle } from "@/hooks";
+import type { InputHTMLAttributes } from "react";
 
-interface PasswordInputProps {
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur: () => void;
+interface PasswordInputProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "type"
+> {
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
   placeholder?: string;
   name?: string;
 }
@@ -19,6 +23,7 @@ export const PasswordInput = ({
   onBlur,
   placeholder = "••••••••",
   name,
+  ...restProps
 }: PasswordInputProps) => {
   const { isVisible, toggle, type } = usePasswordToggle();
 
@@ -33,6 +38,7 @@ export const PasswordInput = ({
         onChange={onChange}
         onBlur={onBlur}
         name={name}
+        {...restProps}
       />
       <button
         type="button"
@@ -40,7 +46,11 @@ export const PasswordInput = ({
         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
         aria-label={isVisible ? "Hide password" : "Show password"}
       >
-        {isVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+        {isVisible ? (
+          <EyeOff className="h-5 w-5" />
+        ) : (
+          <Eye className="h-5 w-5" />
+        )}
       </button>
     </div>
   );

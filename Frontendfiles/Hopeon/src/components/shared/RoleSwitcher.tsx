@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ChevronDown, Heart, Briefcase, Check } from "lucide-react";
 import { useRoleContext, type ViewContext } from "@/context/RoleContext";
 import { ROUTES } from "@/routes/routes";
@@ -17,7 +17,12 @@ interface RoleSwitcherProps {
   mobile?: boolean;
 }
 
-const viewOptions: { value: ViewContext; label: string; icon: typeof Heart; description: string }[] = [
+const viewOptions: {
+  value: ViewContext;
+  label: string;
+  icon: typeof Heart;
+  description: string;
+}[] = [
   {
     value: "donor",
     label: "Donor",
@@ -37,16 +42,13 @@ const viewOptions: { value: ViewContext; label: string; icon: typeof Heart; desc
  * Only visible to users with organizer role
  */
 export default function RoleSwitcher({ mobile = false }: RoleSwitcherProps) {
-  const { activeView: contextActiveView, setActiveView, canSwitchRole } = useRoleContext();
+  const { activeView, setActiveView, canSwitchRole } = useRoleContext();
   const navigate = useNavigate();
-  const location = useLocation();
 
   if (!canSwitchRole) return null;
 
-  // Derive activeView from URL to avoid race conditions (same as NavigationBar)
-  const activeView = location.pathname.startsWith("/organizer") ? "organizer" : contextActiveView;
-
-  const currentView = viewOptions.find((v) => v.value === activeView) || viewOptions[0];
+  const currentView =
+    viewOptions.find((v) => v.value === activeView) || viewOptions[0];
   const CurrentIcon = currentView.icon;
 
   const handleViewChange = (view: ViewContext) => {
@@ -77,7 +79,7 @@ export default function RoleSwitcher({ mobile = false }: RoleSwitcherProps) {
                   "flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl transition-all duration-300",
                   isActive
                     ? "bg-white/20 text-white shadow-lg"
-                    : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+                    : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -121,19 +123,19 @@ export default function RoleSwitcher({ mobile = false }: RoleSwitcherProps) {
                 "flex items-center gap-3 px-3 py-3 rounded-lg cursor-pointer transition-all duration-200",
                 isActive
                   ? "bg-emerald-50 text-emerald-700"
-                  : "hover:bg-gray-50 text-gray-700"
+                  : "hover:bg-gray-50 text-gray-700",
               )}
             >
               <div
                 className={cn(
                   "p-2 rounded-lg",
-                  isActive ? "bg-emerald-100" : "bg-gray-100"
+                  isActive ? "bg-emerald-100" : "bg-gray-100",
                 )}
               >
                 <Icon
                   className={cn(
                     "h-4 w-4",
-                    isActive ? "text-emerald-600" : "text-gray-500"
+                    isActive ? "text-emerald-600" : "text-gray-500",
                   )}
                 />
               </div>

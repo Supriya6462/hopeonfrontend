@@ -22,30 +22,31 @@ export default function PublicRoute({ children }: PublicRouteProps) {
     return <>{children}</>;
   }
 
-  if (isTokenExpired(token, 5000)) {
+  if (isTokenExpired(token)) {
+    clearAuthStorage();
+    window.dispatchEvent(new Event("auth-change"));
+    return <>{children}</>;
+  }
+
+  let role: Role | undefined;
+  try {
+    const user = JSON.parse(userStr);
+    role = user.role;
+  } catch {
+    // Invalid user data, clear and show public page
     clearAuthStorage();
     window.dispatchEvent(new Event("auth-change"));
     return <>{children}</>;
   }
 
   // User is authenticated - redirect to their dashboard
-  try {
-    const user = JSON.parse(userStr);
-    const role: Role = user.role;
-
-    switch (role) {
-      case "admin":
-        return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />;
-      case "organizer":
-        return <Navigate to={ROUTES.ORGANIZER_DASHBOARD} replace />;
-      case "donor":
-      default:
-        return <Navigate to={ROUTES.HOME} replace />;
-    }
-  } catch {
-    // Invalid user data, clear and show public page
-    clearAuthStorage();
-    window.dispatchEvent(new Event("auth-change"));
-    return <>{children}</>;
+  switch (role) {
+    case "admin":
+      return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />;
+    case "organizer":
+      return <Navigate to={ROUTES.ORGANIZER_DASHBOARD} replace />;
+    case "donor":
+    default:
+      return <Navigate to={ROUTES.HOME} replace />;
   }
 }

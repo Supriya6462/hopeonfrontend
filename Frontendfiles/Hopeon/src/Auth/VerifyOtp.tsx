@@ -1,9 +1,14 @@
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, ArrowLeft, Mail } from "lucide-react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   Form,
@@ -29,8 +34,9 @@ type VerifyOtpFormData = z.infer<typeof verifyOtpSchema>;
  */
 export default function VerifyOtp() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
-  const [email, setEmail] = useState<string>("");
+  const [resendCooldown, setResendCooldown] = useState(0);
   const verifyOtpMutation = useVerifyOtp();
   const resendOtpMutation = useResendOtp();
   const purposeParam = searchParams.get("purpose");
@@ -38,6 +44,8 @@ export default function VerifyOtp() {
     purposeParam === OtpPurpose.FORGET_PASSWORD
       ? OtpPurpose.FORGET_PASSWORD
       : OtpPurpose.REGISTER;
+  const emailFromState =
+    (location.state as { email?: string } | null)?.email ?? "";
 
   const form = useForm<VerifyOtpFormData>({
     resolver: zodResolver(verifyOtpSchema),
@@ -45,9 +53,8 @@ export default function VerifyOtp() {
       otp: "",
     },
   });
-
-  // Get flow data from session storage on mount
-  useEffect(() => {
+  const otpValue = useWatch({ control: form.control, name: "otp" });
+  const email = useMemo(() => {
     try {
       const storageKey =
         purpose === OtpPurpose.FORGET_PASSWORD
@@ -56,18 +63,22 @@ export default function VerifyOtp() {
       const rawData = sessionStorage.getItem(storageKey);
 
       if (rawData) {
-        const data = JSON.parse(rawData);
-        setEmail(data.email);
-      } else {
-        navigate(
-          purpose === OtpPurpose.FORGET_PASSWORD
-            ? ROUTES.FORGOT_PASSWORD
-            : ROUTES.REGISTER,
-          { replace: true },
-        );
+        const data = JSON.parse(rawData) as { email?: string };
+        if (data?.email) {
+          return data.email;
+        }
       }
     } catch (error) {
       console.error("Failed to retrieve OTP flow data:", error);
+    }
+
+    return emailFromState;
+  }, [emailFromState, purpose]);
+
+  // Get flow data from session storage on mount
+  useEffect(() => {
+    if (!email) {
+      toast.error("Session expired. Please request a new verification code.");
       navigate(
         purpose === OtpPurpose.FORGET_PASSWORD
           ? ROUTES.FORGOT_PASSWORD
@@ -75,10 +86,23 @@ export default function VerifyOtp() {
         { replace: true },
       );
     }
-  }, [navigate, purpose]);
+  }, [email, navigate, purpose]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+
+    const timerId = window.setInterval(() => {
+      setResendCooldown((current) => (current <= 1 ? 0 : current - 1));
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timerId);
+    };
+  }, [resendCooldown]);
 
   const onSubmit = (values: VerifyOtpFormData) => {
     if (!email) {
+      toast.error("Session expired. Please request a new verification code.");
       return;
     }
 
@@ -99,10 +123,16 @@ export default function VerifyOtp() {
             );
           } catch (error) {
             console.error("Failed to store reset verification data:", error);
+            toast.error(
+              "Could not save reset session. Continue now before refreshing the page.",
+            );
           }
 
           toast.success("Code verified. You can now reset your password.");
-          navigate(ROUTES.RESET_PASSWORD, { replace: true });
+          navigate(ROUTES.RESET_PASSWORD, {
+            replace: true,
+            state: { email, otpCode: values.otp },
+          });
           return;
         }
 
@@ -119,13 +149,20 @@ export default function VerifyOtp() {
 
   const handleResendOtp = () => {
     if (!email) {
+      toast.error("Session expired. Please request a new verification code.");
       return;
     }
+
+    if (resendCooldown > 0) {
+      return;
+    }
+
     resendOtpMutation.mutate({
       email,
       purpose,
       onSuccess: () => {
         toast.success("Verification code resent");
+        setResendCooldown(45);
       },
     });
   };
@@ -133,15 +170,6 @@ export default function VerifyOtp() {
   return (
     <AuthLayout>
       <div className="w-full max-w-md">
-        <AuthFormHeader
-          title={
-            purpose === OtpPurpose.FORGET_PASSWORD
-              ? "Verify Reset Code"
-              : "Verify Your Email"
-          }
-          subtitle="Enter the code sent to your email"
-        />
-
         <Card className="bg-white/80 backdrop-blur-sm shadow-2xl border-0">
           <CardHeader>
             <AuthFormHeader
@@ -186,9 +214,29 @@ export default function VerifyOtp() {
                         <Input
                           type="text"
                           placeholder="Enter 6-digit code"
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          pattern="[0-9]*"
                           maxLength={6}
                           className="h-12 border-2 border-gray-200 focus:border-emerald-500 rounded-xl text-center text-2xl tracking-widest"
                           {...field}
+                          onChange={(event) => {
+                            const nextOtp = event.target.value.replace(
+                              /\D/g,
+                              "",
+                            );
+                            field.onChange(nextOtp);
+                          }}
+                          onPaste={(event) => {
+                            const pastedDigits = event.clipboardData
+                              .getData("text")
+                              .replace(/\D/g, "")
+                              .slice(0, 6);
+
+                            if (!pastedDigits) return;
+                            event.preventDefault();
+                            field.onChange(pastedDigits);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -203,12 +251,16 @@ export default function VerifyOtp() {
                     <button
                       type="button"
                       onClick={handleResendOtp}
-                      disabled={resendOtpMutation.isPending}
+                      disabled={
+                        resendOtpMutation.isPending || resendCooldown > 0
+                      }
                       className="font-medium underline hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {resendOtpMutation.isPending
                         ? "Sending..."
-                        : "Resend Code"}
+                        : resendCooldown > 0
+                          ? `Resend in ${resendCooldown}s`
+                          : "Resend Code"}
                     </button>
                   </p>
                 </div>
@@ -217,6 +269,7 @@ export default function VerifyOtp() {
                 <LoadingButton
                   loading={verifyOtpMutation.isPending}
                   loadingText="Verifying..."
+                  disabled={otpValue?.length !== 6}
                   className="group"
                 >
                   <span>

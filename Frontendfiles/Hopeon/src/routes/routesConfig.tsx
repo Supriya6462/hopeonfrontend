@@ -103,11 +103,19 @@ const routesConfig: RouteObject[] = [
       },
       {
         path: "verify-otp",
-        element: <VerifyOtp />,
+        element: (
+          <PublicRoute>
+            <VerifyOtp />
+          </PublicRoute>
+        ),
       },
       {
         path: "reset-password",
-        element: <ResetPassword />,
+        element: (
+          <PublicRoute>
+            <ResetPassword />
+          </PublicRoute>
+        ),
       },
     ],
   },

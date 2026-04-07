@@ -1,9 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -33,33 +33,48 @@ type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
  */
 export default function ResetPassword() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [otpCode, setOtpCode] = useState("");
+  const location = useLocation();
+  const locationState =
+    (location.state as { email?: string; otpCode?: string } | null) ?? null;
 
-  useEffect(() => {
+  const flowData = useMemo(() => {
     try {
       const resetData = sessionStorage.getItem("resetPasswordData");
-      if (!resetData) {
-        navigate(ROUTES.FORGOT_PASSWORD, { replace: true });
-        return;
-      }
+      if (resetData) {
+        const parsed = JSON.parse(resetData) as {
+          email?: string;
+          otpCode?: string;
+        };
 
-      const parsed = JSON.parse(resetData) as {
-        email?: string;
-        otpCode?: string;
-      };
-      if (!parsed.email || !parsed.otpCode) {
-        navigate(ROUTES.FORGOT_PASSWORD, { replace: true });
-        return;
+        if (parsed.email && parsed.otpCode) {
+          return {
+            email: parsed.email,
+            otpCode: parsed.otpCode,
+            hasValidData: true,
+          };
+        }
       }
-
-      setEmail(parsed.email);
-      setOtpCode(parsed.otpCode);
     } catch (error) {
       console.error("Failed to read reset password data:", error);
+    }
+
+    if (locationState?.email && locationState?.otpCode) {
+      return {
+        email: locationState.email,
+        otpCode: locationState.otpCode,
+        hasValidData: true,
+      };
+    }
+
+    return { email: "", otpCode: "", hasValidData: false };
+  }, [locationState]);
+
+  useEffect(() => {
+    if (!flowData.hasValidData) {
+      toast.error("Reset session expired. Please request a new reset code.");
       navigate(ROUTES.FORGOT_PASSWORD, { replace: true });
     }
-  }, [navigate]);
+  }, [flowData.hasValidData, navigate]);
 
   const resetPasswordMutation = useMutation({
     mutationFn: (payload: {
@@ -79,10 +94,14 @@ export default function ResetPassword() {
       }
       navigate(ROUTES.LOGIN, { replace: true });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const maybeHttpError = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       const message =
-        error?.response?.data?.message ||
-        error?.message ||
+        maybeHttpError.response?.data?.message ||
+        (error instanceof Error ? error.message : undefined) ||
         "Failed to reset password. Please try again.";
       toast.error(message);
     },
@@ -97,16 +116,16 @@ export default function ResetPassword() {
   });
 
   const onSubmit = (values: ResetPasswordFormData) => {
-    if (!email || !otpCode) {
+    if (!flowData.email || !flowData.otpCode) {
       toast.error("Reset session expired. Please request a new reset code.");
       navigate(ROUTES.FORGOT_PASSWORD, { replace: true });
       return;
     }
 
     resetPasswordMutation.mutate({
-      email,
+      email: flowData.email,
       password: values.password,
-      otpCode,
+      otpCode: flowData.otpCode,
     });
   };
 
@@ -128,6 +147,14 @@ export default function ResetPassword() {
           </CardHeader>
 
           <CardContent className="px-8 pb-8">
+            {flowData.email ? (
+              <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <p className="text-sm text-emerald-800">
+                  Resetting password for {flowData.email}
+                </p>
+              </div>
+            ) : null}
+
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -146,6 +173,7 @@ export default function ResetPassword() {
                         <PasswordInput
                           {...field}
                           placeholder="Enter new password"
+                          autoComplete="new-password"
                         />
                       </FormControl>
                       <FormMessage />
@@ -166,6 +194,7 @@ export default function ResetPassword() {
                         <PasswordInput
                           {...field}
                           placeholder="Confirm new password"
+                          autoComplete="new-password"
                         />
                       </FormControl>
                       <FormMessage />
