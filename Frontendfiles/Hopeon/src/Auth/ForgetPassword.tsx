@@ -1,8 +1,10 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, ArrowRight, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Form,
   FormField,
@@ -16,6 +18,8 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { AuthLayout, AuthFormHeader, LoadingButton } from "@/components/auth";
 import { forgotPasswordSchema } from "@/validations";
 import { ROUTES } from "@/routes/routes";
+import { authAPI } from "@/features/api";
+import { OtpPurpose } from "@/enums";
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
@@ -24,6 +28,42 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
  * Allows users to request a password reset OTP
  */
 export default function ForgetPassword() {
+  const navigate = useNavigate();
+
+  const requestOtpMutation = useMutation({
+    mutationFn: (email: string) =>
+      authAPI.requestOtp(email, OtpPurpose.FORGET_PASSWORD),
+    onSuccess: (_data, email) => {
+      toast.success("Reset code sent to your email");
+
+      try {
+        sessionStorage.setItem(
+          "resetPasswordData",
+          JSON.stringify({
+            email,
+            purpose: OtpPurpose.FORGET_PASSWORD,
+          }),
+        );
+      } catch (error) {
+        console.error("Failed to store reset password data:", error);
+      }
+
+      navigate(
+        `${ROUTES.OTP_VERIFICATION}?purpose=${OtpPurpose.FORGET_PASSWORD}`,
+        {
+          replace: true,
+        },
+      );
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to send reset code. Please try again.";
+      toast.error(message);
+    },
+  });
+
   const form = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
@@ -32,8 +72,7 @@ export default function ForgetPassword() {
   });
 
   const onSubmit = (values: ForgotPasswordFormData) => {
-    // TODO: Implement forgot password logic
-    console.log("Forgot password:", values);
+    requestOtpMutation.mutate(values.email);
   };
 
   return (
@@ -88,7 +127,10 @@ export default function ForgetPassword() {
                 </div>
 
                 {/* Submit Button */}
-                <LoadingButton loading={false} loadingText="Sending code...">
+                <LoadingButton
+                  loading={requestOtpMutation.isPending}
+                  loadingText="Sending code..."
+                >
                   <span>Send Reset Code</span>
                   <ArrowRight className="h-5 w-5" />
                 </LoadingButton>

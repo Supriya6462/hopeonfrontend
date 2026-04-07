@@ -1,15 +1,28 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Heart, Target, TrendingUp } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { publicCampaignAPI } from "@/features/api";
+import { donorDonationAPI, publicCampaignAPI } from "@/features/api";
 import { ROUTES } from "@/routes/routes";
+import type { DonationMethod } from "@/enums";
 
 type CampaignDetailsRecord = {
   _id: string;
@@ -56,11 +69,46 @@ const formatCurrency = (value: number) =>
 
 export default function CampaignDetails() {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const [isDonateOpen, setIsDonateOpen] = useState(false);
+  const [amount, setAmount] = useState("50");
+  const [method, setMethod] = useState<DonationMethod>("paypal");
+  const [donorEmail, setDonorEmail] = useState(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      return user.email || "";
+    } catch {
+      return "";
+    }
+  });
 
   const campaignQuery = useQuery({
     queryKey: ["publicCampaign", id],
     queryFn: () => publicCampaignAPI.getCampaignById(id!),
     enabled: Boolean(id),
+  });
+
+  const donationMutation = useMutation({
+    mutationFn: (payload: {
+      campaign: string;
+      amount: number;
+      donorEmail: string;
+      method: DonationMethod;
+    }) => donorDonationAPI.createDonation(payload),
+    onSuccess: () => {
+      toast.success("Donation submitted successfully.");
+      setIsDonateOpen(false);
+      setAmount("50");
+      queryClient.invalidateQueries({ queryKey: ["publicCampaign", id] });
+      queryClient.invalidateQueries({ queryKey: ["publicCampaigns"] });
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Donation failed. Please try again.";
+      toast.error(message);
+    },
   });
 
   const campaign = useMemo(
@@ -106,6 +154,31 @@ export default function CampaignDetails() {
   const target = Number(campaign.target ?? 0);
   const progress = target > 0 ? Math.min((raised / target) * 100, 100) : 0;
   const image = campaign.images?.[0] || campaign.imageURL || "/placeholder.svg";
+
+  const handleDonate = () => {
+    if (!id) {
+      toast.error("Campaign is not available right now.");
+      return;
+    }
+
+    const parsedAmount = Number(amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      toast.error("Please enter a valid donation amount.");
+      return;
+    }
+
+    if (!donorEmail.trim()) {
+      toast.error("Please enter your email address.");
+      return;
+    }
+
+    donationMutation.mutate({
+      campaign: id,
+      amount: parsedAmount,
+      donorEmail: donorEmail.trim(),
+      method,
+    });
+  };
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -154,10 +227,93 @@ export default function CampaignDetails() {
             </div>
           </div>
 
-          <Button className="w-full sm:w-auto">
-            <Heart className="h-4 w-4" />
-            Donate (Coming Soon)
-          </Button>
+          <Dialog open={isDonateOpen} onOpenChange={setIsDonateOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full sm:w-auto">
+                <Heart className="h-4 w-4" />
+                Donate Now
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Donate to this campaign</DialogTitle>
+                <DialogDescription>
+                  Choose your amount and method. Your support helps this
+                  campaign move forward.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label
+                    className="text-sm font-medium text-gray-700"
+                    htmlFor="donation-email"
+                  >
+                    Email address
+                  </label>
+                  <Input
+                    id="donation-email"
+                    type="email"
+                    value={donorEmail}
+                    onChange={(event) => setDonorEmail(event.target.value)}
+                    placeholder="you@example.com"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    className="text-sm font-medium text-gray-700"
+                    htmlFor="donation-amount"
+                  >
+                    Amount (USD)
+                  </label>
+                  <Input
+                    id="donation-amount"
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    value={amount}
+                    onChange={(event) => setAmount(event.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-700">
+                    Payment method
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      type="button"
+                      variant={method === "paypal" ? "default" : "outline"}
+                      onClick={() => setMethod("paypal")}
+                    >
+                      PayPal
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={method === "crypto" ? "default" : "outline"}
+                      onClick={() => setMethod("crypto")}
+                    >
+                      Crypto
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  onClick={handleDonate}
+                  disabled={donationMutation.isPending}
+                  className="w-full sm:w-auto"
+                >
+                  {donationMutation.isPending
+                    ? "Submitting..."
+                    : "Confirm Donation"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
     </div>

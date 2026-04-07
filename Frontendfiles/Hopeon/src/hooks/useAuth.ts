@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { authAPI } from "@/features/api/publicapi/public.api";
 import type { RegisterInput, LoginInput, AuthResponse } from "@/types";
-import { OtpPurpose } from "@/enums";
+import { OtpPurpose, type OtpPurposeType } from "@/enums";
 import { ROUTES } from "@/routes/routes";
 
 /**
@@ -17,7 +17,7 @@ export const useRegister = () => {
     mutationFn: authAPI.register,
     onSuccess: (_data, variables) => {
       toast.success("OTP sent to your email");
-      
+
       // Store registration data in session storage for OTP verification
       try {
         sessionStorage.setItem(
@@ -26,13 +26,13 @@ export const useRegister = () => {
             name: variables.name,
             email: variables.email,
             password: variables.password,
-            phoneNumber: variables.phoneNumber
-          })
+            phoneNumber: variables.phoneNumber,
+          }),
         );
       } catch (error) {
         console.error("Failed to store registration data:", error);
       }
-      
+
       // Navigate to OTP verification page
       navigate(ROUTES.OTP_VERIFICATION, { replace: true });
     },
@@ -49,25 +49,39 @@ export const useRegister = () => {
 export const useVerifyOtp = () => {
   const navigate = useNavigate();
 
-  return useMutation<AuthResponse, Error, { email: string; otp: string }>({
-    mutationFn: async ({ email, otp }) => {
-      return authAPI.verifyOtp(email, otp, OtpPurpose.REGISTER);
+  return useMutation<
+    AuthResponse,
+    Error,
+    {
+      email: string;
+      otp: string;
+      purpose?: OtpPurposeType;
+      onSuccess?: () => void;
+    }
+  >({
+    mutationFn: async ({ email, otp, purpose = OtpPurpose.REGISTER }) => {
+      return authAPI.verifyOtp(email, otp, purpose);
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      if (variables.onSuccess) {
+        variables.onSuccess();
+        return;
+      }
+
       toast.success("Email verified successfully! Please login.");
-      
-      // Clear registration data from session storage
+
       try {
         sessionStorage.removeItem("registrationData");
       } catch (error) {
         console.error("Failed to clear registration data:", error);
       }
-      
-      // Navigate to login page
+
       navigate(ROUTES.LOGIN, { replace: true });
     },
     onError: (error) => {
-      toast.error(error.message || "OTP verification failed. Please try again.");
+      toast.error(
+        error.message || "OTP verification failed. Please try again.",
+      );
     },
   });
 };
@@ -77,11 +91,20 @@ export const useVerifyOtp = () => {
  * Handles OTP resend logic
  */
 export const useResendOtp = () => {
-  return useMutation<any, Error, string>({
-    mutationFn: async (email: string) => {
-      return authAPI.requestOtp(email, OtpPurpose.REGISTER);
+  return useMutation<
+    any,
+    Error,
+    { email: string; purpose?: OtpPurposeType; onSuccess?: () => void }
+  >({
+    mutationFn: async ({ email, purpose = OtpPurpose.REGISTER }) => {
+      return authAPI.requestOtp(email, purpose);
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      if (variables.onSuccess) {
+        variables.onSuccess();
+        return;
+      }
+
       toast.success("OTP resent to your email");
     },
     onError: (error) => {
@@ -101,7 +124,7 @@ export const useLogin = () => {
     mutationFn: authAPI.login,
     onSuccess: (data) => {
       toast.success("Login successful!");
-      
+
       // Store authentication token
       try {
         localStorage.setItem("authToken", data.data.accessToken);
@@ -111,10 +134,10 @@ export const useLogin = () => {
       } catch (error) {
         console.error("Failed to store auth data:", error);
       }
-      
+
       // Navigate based on user role
       const userRole = data.data.result.role;
-      
+
       switch (userRole) {
         case "admin":
           navigate(ROUTES.ADMIN_DASHBOARD, { replace: true });
@@ -129,7 +152,9 @@ export const useLogin = () => {
       }
     },
     onError: (error) => {
-      toast.error(error.message || "Login failed. Please check your credentials.");
+      toast.error(
+        error.message || "Login failed. Please check your credentials.",
+      );
     },
   });
 };

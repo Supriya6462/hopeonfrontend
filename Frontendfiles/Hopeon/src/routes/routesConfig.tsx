@@ -32,8 +32,8 @@ import OrganizerWithdrawals from "@/features/organizer/pages/Withdrawals";
 // Admin Pages
 import AdminDashboard from "@/features/admin/pages/Dashboard";
 import {
-  Adminkycverification,
-  Adminorganizermanagement,
+  AdminKycVerification,
+  AdminOrganizerManagement,
 } from "@/features/admin/pages";
 
 import { ROUTES } from "./routes";
@@ -223,7 +223,7 @@ const routesConfig: RouteObject[] = [
       },
       {
         path: "organizers",
-        element: <Adminorganizermanagement />,
+        element: <AdminOrganizerManagement />,
       },
       {
         path: "donations",
@@ -236,8 +236,8 @@ const routesConfig: RouteObject[] = [
         ),
       },
       {
-        path: "Applications",
-        element: <Adminkycverification />,
+        path: "applications",
+        element: <AdminKycVerification />,
       },
     ],
   },

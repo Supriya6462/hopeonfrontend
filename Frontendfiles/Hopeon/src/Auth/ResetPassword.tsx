@@ -1,8 +1,11 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Form,
   FormField,
@@ -12,9 +15,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { AuthLayout, AuthFormHeader, PasswordInput, LoadingButton } from "@/components/auth";
+import {
+  AuthLayout,
+  AuthFormHeader,
+  PasswordInput,
+  LoadingButton,
+} from "@/components/auth";
 import { resetPasswordSchema } from "@/validations";
 import { ROUTES } from "@/routes/routes";
+import { authAPI } from "@/features/api";
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
@@ -23,6 +32,62 @@ type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
  * Allows users to set a new password after OTP verification
  */
 export default function ResetPassword() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+
+  useEffect(() => {
+    try {
+      const resetData = sessionStorage.getItem("resetPasswordData");
+      if (!resetData) {
+        navigate(ROUTES.FORGOT_PASSWORD, { replace: true });
+        return;
+      }
+
+      const parsed = JSON.parse(resetData) as {
+        email?: string;
+        otpCode?: string;
+      };
+      if (!parsed.email || !parsed.otpCode) {
+        navigate(ROUTES.FORGOT_PASSWORD, { replace: true });
+        return;
+      }
+
+      setEmail(parsed.email);
+      setOtpCode(parsed.otpCode);
+    } catch (error) {
+      console.error("Failed to read reset password data:", error);
+      navigate(ROUTES.FORGOT_PASSWORD, { replace: true });
+    }
+  }, [navigate]);
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (payload: {
+      email: string;
+      password: string;
+      otpCode: string;
+    }) =>
+      authAPI.resetPassword(payload.email, payload.password, payload.otpCode),
+    onSuccess: () => {
+      toast.success(
+        "Password reset successful. Please login with your new password.",
+      );
+      try {
+        sessionStorage.removeItem("resetPasswordData");
+      } catch (error) {
+        console.error("Failed to clear reset password data:", error);
+      }
+      navigate(ROUTES.LOGIN, { replace: true });
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to reset password. Please try again.";
+      toast.error(message);
+    },
+  });
+
   const form = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -32,8 +97,17 @@ export default function ResetPassword() {
   });
 
   const onSubmit = (values: ResetPasswordFormData) => {
-    // TODO: Implement reset password logic
-    console.log("Reset password:", values);
+    if (!email || !otpCode) {
+      toast.error("Reset session expired. Please request a new reset code.");
+      navigate(ROUTES.FORGOT_PASSWORD, { replace: true });
+      return;
+    }
+
+    resetPasswordMutation.mutate({
+      email,
+      password: values.password,
+      otpCode,
+    });
   };
 
   return (
@@ -69,7 +143,10 @@ export default function ResetPassword() {
                         New Password
                       </FormLabel>
                       <FormControl>
-                        <PasswordInput {...field} placeholder="Enter new password" />
+                        <PasswordInput
+                          {...field}
+                          placeholder="Enter new password"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -105,7 +182,10 @@ export default function ResetPassword() {
                 </div>
 
                 {/* Submit Button */}
-                <LoadingButton loading={false} loadingText="Resetting password...">
+                <LoadingButton
+                  loading={resetPasswordMutation.isPending}
+                  loadingText="Resetting password..."
+                >
                   <span>Reset Password</span>
                   <ArrowRight className="h-5 w-5" />
                 </LoadingButton>

@@ -1,9 +1,10 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, ArrowLeft, Mail } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   Form,
   FormField,
@@ -18,6 +19,7 @@ import { AuthLayout, AuthFormHeader, LoadingButton } from "@/components/auth";
 import { useVerifyOtp, useResendOtp } from "@/hooks";
 import { verifyOtpSchema } from "@/validations";
 import { ROUTES } from "@/routes/routes";
+import { OtpPurpose, type OtpPurposeType } from "@/enums";
 
 type VerifyOtpFormData = z.infer<typeof verifyOtpSchema>;
 
@@ -27,9 +29,15 @@ type VerifyOtpFormData = z.infer<typeof verifyOtpSchema>;
  */
 export default function VerifyOtp() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState<string>("");
   const verifyOtpMutation = useVerifyOtp();
   const resendOtpMutation = useResendOtp();
+  const purposeParam = searchParams.get("purpose");
+  const purpose: OtpPurposeType =
+    purposeParam === OtpPurpose.FORGET_PASSWORD
+      ? OtpPurpose.FORGET_PASSWORD
+      : OtpPurpose.REGISTER;
 
   const form = useForm<VerifyOtpFormData>({
     resolver: zodResolver(verifyOtpSchema),
@@ -38,49 +46,110 @@ export default function VerifyOtp() {
     },
   });
 
-  // Get email from session storage on mount
+  // Get flow data from session storage on mount
   useEffect(() => {
     try {
-      const registrationData = sessionStorage.getItem("registrationData");
-      if (registrationData) {
-        const data = JSON.parse(registrationData);
+      const storageKey =
+        purpose === OtpPurpose.FORGET_PASSWORD
+          ? "resetPasswordData"
+          : "registrationData";
+      const rawData = sessionStorage.getItem(storageKey);
+
+      if (rawData) {
+        const data = JSON.parse(rawData);
         setEmail(data.email);
       } else {
-        // No registration data found, redirect to register
-        navigate(ROUTES.REGISTER, { replace: true });
+        navigate(
+          purpose === OtpPurpose.FORGET_PASSWORD
+            ? ROUTES.FORGOT_PASSWORD
+            : ROUTES.REGISTER,
+          { replace: true },
+        );
       }
     } catch (error) {
-      console.error("Failed to retrieve registration data:", error);
-      navigate(ROUTES.REGISTER, { replace: true });
+      console.error("Failed to retrieve OTP flow data:", error);
+      navigate(
+        purpose === OtpPurpose.FORGET_PASSWORD
+          ? ROUTES.FORGOT_PASSWORD
+          : ROUTES.REGISTER,
+        { replace: true },
+      );
     }
-  }, [navigate]);
+  }, [navigate, purpose]);
 
   const onSubmit = (values: VerifyOtpFormData) => {
     if (!email) {
       return;
     }
-    verifyOtpMutation.mutate({ email, otp: values.otp });
+
+    verifyOtpMutation.mutate({
+      email,
+      otp: values.otp,
+      purpose,
+      onSuccess: () => {
+        if (purpose === OtpPurpose.FORGET_PASSWORD) {
+          try {
+            sessionStorage.setItem(
+              "resetPasswordData",
+              JSON.stringify({
+                email,
+                purpose,
+                otpCode: values.otp,
+              }),
+            );
+          } catch (error) {
+            console.error("Failed to store reset verification data:", error);
+          }
+
+          toast.success("Code verified. You can now reset your password.");
+          navigate(ROUTES.RESET_PASSWORD, { replace: true });
+          return;
+        }
+
+        toast.success("Email verified successfully! Please login.");
+        try {
+          sessionStorage.removeItem("registrationData");
+        } catch (error) {
+          console.error("Failed to clear registration data:", error);
+        }
+        navigate(ROUTES.LOGIN, { replace: true });
+      },
+    });
   };
 
   const handleResendOtp = () => {
     if (!email) {
       return;
     }
-    resendOtpMutation.mutate(email);
+    resendOtpMutation.mutate({
+      email,
+      purpose,
+      onSuccess: () => {
+        toast.success("Verification code resent");
+      },
+    });
   };
 
   return (
     <AuthLayout>
       <div className="w-full max-w-md">
         <AuthFormHeader
-          title="Verify Your Email"
+          title={
+            purpose === OtpPurpose.FORGET_PASSWORD
+              ? "Verify Reset Code"
+              : "Verify Your Email"
+          }
           subtitle="Enter the code sent to your email"
         />
 
         <Card className="bg-white/80 backdrop-blur-sm shadow-2xl border-0">
           <CardHeader>
             <AuthFormHeader
-              title="Verify Your Email"
+              title={
+                purpose === OtpPurpose.FORGET_PASSWORD
+                  ? "Verify Reset Code"
+                  : "Verify Your Email"
+              }
               subtitle="Enter the code sent to your email"
               showMobileHeader={false}
             />
@@ -137,7 +206,9 @@ export default function VerifyOtp() {
                       disabled={resendOtpMutation.isPending}
                       className="font-medium underline hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {resendOtpMutation.isPending ? "Sending..." : "Resend Code"}
+                      {resendOtpMutation.isPending
+                        ? "Sending..."
+                        : "Resend Code"}
                     </button>
                   </p>
                 </div>
@@ -148,7 +219,11 @@ export default function VerifyOtp() {
                   loadingText="Verifying..."
                   className="group"
                 >
-                  <span>Verify Email</span>
+                  <span>
+                    {purpose === OtpPurpose.FORGET_PASSWORD
+                      ? "Verify Code"
+                      : "Verify Email"}
+                  </span>
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </LoadingButton>
 
