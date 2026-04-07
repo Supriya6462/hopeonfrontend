@@ -2,7 +2,12 @@
 export { default as api } from "./axios";
 
 // Export Public APIs
-export { authAPI, publicCampaignAPI, publicDonationAPI } from "./publicapi/public.api";
+export {
+  authAPI,
+  publicCampaignAPI,
+  publicDonationAPI,
+} from "./publicapi/public.api";
+export { newsletterAPI } from "./publicapi/newsletter.api";
 
 // Export Donor APIs
 export { donorDonationAPI, donorOrganizerAPI } from "./donor/donor.api";

@@ -1,9 +1,9 @@
 import { Outlet } from "react-router-dom";
-import { NavigationBar, Footer } from "@/components/shared";
+import { Footer, ScrollToTop } from "@/components/shared";
 import { RoleProvider } from "@/context/RoleContext";
 import { useAuth } from "@/context/AuthContext";
 // import { ROUTES } from "@/routes/routes";
-import { useLogout } from "@/hooks/useAuth";
+import { TopNav } from "@/layouts/navigation";
 
 /**
  * DonorLayout - Main layout wrapper for donor/public pages
@@ -13,7 +13,6 @@ import { useLogout } from "@/hooks/useAuth";
 export default function DonorLayout() {
   // const navigate = useNavigate();
   const { user } = useAuth();
-  const { logout } = useLogout();
 
   // const handleLogout = () => {
   //   logout();
@@ -21,10 +20,15 @@ export default function DonorLayout() {
   // };
 
   return (
-    <RoleProvider userRole={user?.role} isOrganizerRevoked={user?.isOrganizerRevoked}>
+    <RoleProvider
+      userRole={user?.role}
+      isOrganizerRevoked={user?.isOrganizerRevoked}
+    >
       <div className="min-h-screen flex flex-col bg-gray-50">
+        <ScrollToTop />
+
         {/* Navigation Bar */}
-        <NavigationBar user={user} onLogout={logout} />
+        <TopNav />
 
         {/* Main Content */}
         <main className="flex-1">

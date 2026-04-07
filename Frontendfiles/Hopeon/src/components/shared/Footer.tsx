@@ -1,142 +1,218 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import {
+  Heart,
+  Mail,
+  Phone,
+  MapPin,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  ArrowUp,
+} from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ROUTES } from "@/routes/routes";
+import {
+  newsletterAPI,
+  newsletterInputSchema,
+} from "@/features/api/publicapi/newsletter.api";
 
 /**
  * Footer - Main footer component with links, contact info, and social media
  */
+const QUICK_LINKS = [
+  { name: "Home", href: ROUTES.HOME },
+  { name: "About", href: ROUTES.ABOUTUS },
+  { name: "Donate", href: ROUTES.CAMPAIGNS },
+  { name: "Login", href: ROUTES.LOGIN },
+  { name: "Register", href: ROUTES.REGISTER },
+];
+
+const SUPPORT_LINKS = [
+  { name: "My Donations", href: ROUTES.DONOR_DONATIONS },
+  { name: "Apply Organizer", href: ROUTES.APPLY_ORGANIZER },
+  { name: "Organizer Dashboard", href: ROUTES.ORGANIZER_DASHBOARD },
+];
+
 export default function Footer() {
+  const [email, setEmail] = useState("");
   const currentYear = new Date().getFullYear();
 
-  const quickLinks = [
-    { name: "Home", path: ROUTES.HOME },
-    { name: "Campaigns", path: ROUTES.CAMPAIGNS },
-    { name: "About Us", path: "/about" },
-    { name: "Contact", path: "/contact" },
-  ];
+  const subscribeMutation = useMutation({
+    mutationFn: newsletterAPI.subscribe,
+    onSuccess: (response) => {
+      toast.success(
+        response.message || "You have been subscribed successfully.",
+      );
+      setEmail("");
+    },
+    onError: (error: unknown) => {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Subscription failed. Please try again.";
+      toast.error(message);
+    },
+  });
 
-  const supportLinks = [
-    { name: "How It Works", path: "/how-it-works" },
-    { name: "FAQs", path: "/faqs" },
-    { name: "Privacy Policy", path: "/privacy" },
-    { name: "Terms of Service", path: "/terms" },
-  ];
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
-  const socialLinks = [
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Linkedin, href: "#", label: "LinkedIn" },
-  ];
+  const handleSubscribe = () => {
+    const parsed = newsletterInputSchema.safeParse({ email });
+    if (!parsed.success) {
+      toast.error(
+        parsed.error.issues[0]?.message || "Please enter a valid email.",
+      );
+      return;
+    }
+
+    subscribeMutation.mutate(parsed.data);
+  };
 
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand Section */}
-          <div className="space-y-4">
-            <Link to={ROUTES.HOME} className="flex items-center gap-2">
-              <Heart className="h-8 w-8 text-emerald-500" />
-              <span className="text-2xl font-bold text-white">HopeOn</span>
+    <footer className="border-t border-background/10 bg-foreground text-background/80">
+      <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 sm:py-16">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-5">
+            <Link to={ROUTES.HOME} className="inline-flex items-center gap-2.5">
+              <Heart className="h-7 w-7 text-primary" />
+              <span className="text-2xl font-bold text-background">HopeOn</span>
             </Link>
-            <p className="text-sm text-gray-400 leading-relaxed">
-              Empowering communities through transparent and impactful fundraising. 
-              Together, we can make a difference.
+            <p className="max-w-sm text-sm leading-7 text-background/65">
+              HopeOn empowers communities with transparent fundraising and clear
+              impact tracking. Give with confidence and create meaningful
+              change.
             </p>
-            {/* Social Links */}
-            <div className="flex gap-3 pt-2">
-              {socialLinks.map(({ icon: Icon, href, label }) => (
+
+            <div className="flex gap-3">
+              {[
+                { icon: Facebook, href: "#", label: "Facebook" },
+                { icon: Twitter, href: "#", label: "Twitter" },
+                { icon: Instagram, href: "#", label: "Instagram" },
+                { icon: Linkedin, href: "#", label: "LinkedIn" },
+              ].map((social) => (
                 <a
-                  key={label}
-                  href={href}
-                  aria-label={label}
-                  className="p-2 bg-gray-800 rounded-lg hover:bg-emerald-600 transition-colors duration-300"
+                  key={social.label}
+                  href={social.href}
+                  aria-label={social.label}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-background/15 bg-background/10 transition-colors duration-200 hover:bg-background/20"
                 >
-                  <Icon className="h-5 w-5" />
+                  <social.icon className="h-4 w-4 text-background/70" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              {quickLinks.map(({ name, path }) => (
-                <li key={path}>
+            <h3 className="mb-4 text-base font-semibold text-background">
+              Quick Links
+            </h3>
+            <ul className="space-y-2.5">
+              {QUICK_LINKS.map((link) => (
+                <li key={link.name}>
                   <Link
-                    to={path}
-                    className="text-sm text-gray-400 hover:text-emerald-400 transition-colors duration-300"
+                    to={link.href}
+                    className="text-sm text-background/65 transition-colors duration-200 hover:text-background"
                   >
-                    {name}
+                    {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Support Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Support</h3>
-            <ul className="space-y-2">
-              {supportLinks.map(({ name, path }) => (
-                <li key={path}>
+            <h3 className="mb-4 text-base font-semibold text-background">
+              Support
+            </h3>
+            <ul className="space-y-2.5">
+              {SUPPORT_LINKS.map((link) => (
+                <li key={link.name}>
                   <Link
-                    to={path}
-                    className="text-sm text-gray-400 hover:text-emerald-400 transition-colors duration-300"
+                    to={link.href}
+                    className="text-sm text-background/65 transition-colors duration-200 hover:text-background"
                   >
-                    {name}
+                    {link.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact Info */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Contact Us</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                <span className="text-sm text-gray-400">
-                  123 Hope Street, Charity City, CC 12345
-                </span>
-              </li>
-              <li className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-emerald-500 shrink-0" />
-                <a
-                  href="tel:+1234567890"
-                  className="text-sm text-gray-400 hover:text-emerald-400 transition-colors"
+          <div className="space-y-5">
+            <h3 className="text-base font-semibold text-background">
+              Get In Touch
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-sm text-background/65">
+                <Mail className="h-4 w-4 text-primary" />
+                <span>support@hopeon.com</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-background/65">
+                <Phone className="h-4 w-4 text-primary" />
+                <span>+1 (555) 123-4567</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-background/65">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span>123 Impact Street, Change City</span>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-background/10 bg-background/8 p-4">
+              <h4 className="mb-2 text-sm font-semibold text-background">
+                Stay Updated
+              </h4>
+              <p className="mb-3 text-sm text-background/65">
+                Get the latest impact stories and updates.
+              </p>
+              <div className="space-y-2.5">
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="border-background/20 bg-transparent text-background placeholder:text-background/40"
+                  aria-label="Email address"
+                />
+                <Button
+                  type="button"
+                  className="w-full bg-primary hover:bg-primary/90"
+                  onClick={handleSubscribe}
+                  disabled={subscribeMutation.isPending}
                 >
-                  +1 (234) 567-890
-                </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-emerald-500 shrink-0" />
-                <a
-                  href="mailto:support@hopeon.com"
-                  className="text-sm text-gray-400 hover:text-emerald-400 transition-colors"
-                >
-                  support@hopeon.com
-                </a>
-              </li>
-            </ul>
+                  {subscribeMutation.isPending ? "Subscribing..." : "Subscribe"}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div className="border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-500">
-              © {currentYear} HopeOn. All rights reserved.
-            </p>
-            <p className="text-sm text-gray-500 flex items-center gap-1">
-              Made with <Heart className="h-4 w-4 text-red-500" /> for a better world
-            </p>
+      <div className="border-t border-background/10">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-sm text-background/55 sm:flex-row sm:px-6">
+          <div>
+            © {currentYear}{" "}
+            <Link
+              to={ROUTES.HOME}
+              className="font-medium text-background transition-colors hover:text-primary"
+            >
+              HopeOn
+            </Link>
+            . All Rights Reserved.
           </div>
+          <button
+            onClick={scrollToTop}
+            className="inline-flex items-center gap-1 text-background/55 transition-colors hover:text-background"
+          >
+            <ArrowUp className="h-4 w-4" />
+            <span>Back to top</span>
+          </button>
         </div>
       </div>
     </footer>

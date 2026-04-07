@@ -16,6 +16,8 @@ export const ROUTES = {
   ABOUTUS: "/aboutus",
   CAMPAIGNS: "/campaigns",
   CAMPAIGN_DETAILS: "/campaigns/:id",
+  ABOUT: "/aboutus",
+  DONATE: "/campaigns",
 
   // Donor Routes (Protected)
   DonorHomepage: "/donor/homepage",
@@ -24,6 +26,8 @@ export const ROUTES = {
   DONOR_DONATIONS: "/donor/donations",
   DONOR_PROFILE: "/donor/profile",
   APPLY_ORGANIZER: "/donor/apply-organizer",
+  DASHBOARD: "/donor/dashboard",
+  MY_DONATIONS: "/donor/donations",
 
   // Organizer Routes
   ORGANIZER_DASHBOARD: "/organizer/dashboard",
