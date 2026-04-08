@@ -11,60 +11,12 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { organizerResponseParsers } from "@/features/api";
 import { ROUTES } from "@/routes/routes";
 import type { Campaign } from "@/types";
 import { toast } from "sonner";
 
 import { useOrganizerCampaigns, useOrganizerDonationStats } from "../hooks";
-
-type OrganizerStats = {
-  totalAmount?: number;
-  avgDonation?: number;
-  totalDonations?: number;
-  totalDonors?: number;
-};
-
-function extractCampaignsFromResponse(data: unknown): Campaign[] {
-  const root = (data ?? {}) as Record<string, any>;
-  const candidates = [
-    root,
-    root.data,
-    root.result,
-    root.data?.data,
-    root.data?.result,
-  ];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) return candidate as Campaign[];
-    if (Array.isArray(candidate?.campaigns)) {
-      return candidate.campaigns as Campaign[];
-    }
-    if (Array.isArray(candidate?.data?.campaigns)) {
-      return candidate.data.campaigns as Campaign[];
-    }
-  }
-
-  return [];
-}
-
-function extractDonationStats(data: unknown): OrganizerStats {
-  const root = (data ?? {}) as Record<string, any>;
-  const candidates = [root, root.data, root.result, root.data?.data];
-
-  for (const candidate of candidates) {
-    if (candidate && typeof candidate === "object") {
-      if (
-        "totalAmount" in candidate ||
-        "avgDonation" in candidate ||
-        "totalDonations" in candidate
-      ) {
-        return candidate as OrganizerStats;
-      }
-    }
-  }
-
-  return {};
-}
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", {
@@ -123,8 +75,13 @@ export default function OrganizerDashboard() {
     return "Organizer";
   };
 
-  const campaigns = extractCampaignsFromResponse(campaignsQuery.data);
-  const donationStats = extractDonationStats(donationStatsQuery.data);
+  const campaigns = organizerResponseParsers.extractCampaignsFromResponse(
+    campaignsQuery.data,
+  );
+  const donationStats =
+    organizerResponseParsers.extractDonationStatsFromResponse(
+      donationStatsQuery.data,
+    );
   const activeCampaignCount = campaigns.filter(
     (campaign) => !campaign.isClosed,
   ).length;

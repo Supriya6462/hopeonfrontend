@@ -14,7 +14,7 @@ import { PublicRoute, ProtectedRoute } from "@/components/guards";
 // Layouts
 import DonorLayout from "@/layouts/DonorLayout";
 import OrganizerLayout from "@/layouts/OrganizerLayout";
-import AdminLayout from "@/layouts/AdminLayout";
+import { AdminLayout } from "@/layouts";
 
 // Donor Pages
 import DonorDashboard from "@/features/donor/pages/Dashboard";
@@ -28,6 +28,7 @@ import OrganizerCampaigns from "@/features/organizer/pages/Campaigns";
 import EditCampaign from "@/features/organizer/pages/EditCampaign";
 import CampaignInsights from "@/features/organizer/pages/CampaignInsights";
 import OrganizerWithdrawals from "@/features/organizer/pages/Withdrawals";
+import OrganizerProfile from "@/features/organizer/pages/Profile";
 
 // Admin Pages
 import AdminDashboard from "@/features/admin/pages/Dashboard";
@@ -199,7 +200,7 @@ const routesConfig: RouteObject[] = [
       },
       {
         path: "profile",
-        element: <div className="p-4">Organizer Profile - Coming soon</div>,
+        element: <OrganizerProfile />,
       },
     ],
   },

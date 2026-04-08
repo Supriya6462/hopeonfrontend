@@ -17,6 +17,8 @@ export {
   organizerCampaignAPI,
   organizerWithdrawalAPI,
   organizerDonationAPI,
+  organizerProfileAPI,
+  organizerResponseParsers,
 } from "./organizer/organizer.api";
 
 // Export Admin APIs

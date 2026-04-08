@@ -1,5 +1,14 @@
 import axios from "axios";
 import api from "../axios";
+import {
+  extractCampaignListFromResponse,
+  extractCampaignsFromResponse,
+  extractDonationStatsFromResponse,
+  extractOrganizerProfileFromResponse,
+  extractWithdrawalFromResponse,
+  extractWithdrawalListFromResponse,
+  extractWithdrawalsFromResponse,
+} from "./organizer.parsers";
 import type {
   CampaignFilters,
   CreateCampaignDTO,
@@ -112,4 +121,39 @@ export const organizerDonationAPI = {
     });
     return response.data;
   },
+};
+
+export const organizerProfileAPI = {
+  getProfile: async () => {
+    const response = await api.get("/api/organizer/profile");
+    return response.data;
+  },
+
+  upsertProfile: async (data: unknown) => {
+    const response = await api.post("/api/organizer/profile", data);
+    return response.data;
+  },
+
+  uploadProfileDocument: async (data: FormData) => {
+    const response = await api.post(
+      "/api/organizer/profile/upload-document",
+      data,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response.data;
+  },
+};
+
+export const organizerResponseParsers = {
+  extractCampaignsFromResponse,
+  extractCampaignListFromResponse,
+  extractDonationStatsFromResponse,
+  extractWithdrawalsFromResponse,
+  extractWithdrawalListFromResponse,
+  extractWithdrawalFromResponse,
+  extractOrganizerProfileFromResponse,
 };

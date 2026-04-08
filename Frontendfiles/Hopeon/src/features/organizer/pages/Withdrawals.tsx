@@ -25,8 +25,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Campaign, WithdrawalFilters, WithdrawalRequest } from "@/types";
+import {
+  createWithdrawalSchema,
+  type CreateWithdrawalInput,
+} from "@/validations/organizer.schema";
+import { organizerResponseParsers } from "@/features/api";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import {
   useOrganizerCampaigns,
@@ -34,138 +38,6 @@ import {
   useOrganizerWithdrawalActions,
   useOrganizerWithdrawals,
 } from "../hooks";
-
-function extractCampaignsFromResponse(data: unknown): Campaign[] {
-  const root = (data ?? {}) as Record<string, any>;
-  const candidates = [
-    root,
-    root.data,
-    root.result,
-    root.data?.data,
-    root.data?.result,
-  ];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) return candidate as Campaign[];
-    if (Array.isArray(candidate?.campaigns)) {
-      return candidate.campaigns as Campaign[];
-    }
-    if (Array.isArray(candidate?.data?.campaigns)) {
-      return candidate.data.campaigns as Campaign[];
-    }
-  }
-
-  return [];
-}
-
-function extractWithdrawalsFromResponse(data: unknown): WithdrawalRequest[] {
-  const root = (data ?? {}) as Record<string, any>;
-  const candidates = [root, root.data, root.result, root.data?.data];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) return candidate as WithdrawalRequest[];
-    if (Array.isArray(candidate?.withdrawals)) {
-      return candidate.withdrawals as WithdrawalRequest[];
-    }
-    if (Array.isArray(candidate?.data?.withdrawals)) {
-      return candidate.data.withdrawals as WithdrawalRequest[];
-    }
-  }
-
-  return [];
-}
-
-interface PaginationMeta {
-  page: number;
-  limit: number;
-  total: number;
-  pages: number;
-}
-
-function extractWithdrawalListFromResponse(
-  data: unknown,
-  fallback: { page: number; limit: number },
-): { withdrawals: WithdrawalRequest[]; pagination: PaginationMeta } {
-  const root = (data ?? {}) as Record<string, any>;
-  const candidates = [root, root.data, root.result, root.data?.data];
-
-  const withdrawals = extractWithdrawalsFromResponse(data);
-
-  let pagination: PaginationMeta = {
-    page: fallback.page,
-    limit: fallback.limit,
-    total: 0,
-    pages: 1,
-  };
-
-  for (const candidate of candidates) {
-    const meta = candidate?.pagination;
-    if (meta && typeof meta === "object") {
-      pagination = {
-        page: Number(meta.page) || fallback.page,
-        limit: Number(meta.limit) || fallback.limit,
-        total: Number(meta.total) || withdrawals.length,
-        pages: Number(meta.pages) || 1,
-      };
-      break;
-    }
-  }
-
-  if (pagination.total === 0 && withdrawals.length > 0) {
-    pagination = {
-      ...pagination,
-      total: withdrawals.length,
-      pages: Math.max(1, Math.ceil(withdrawals.length / pagination.limit)),
-    };
-  }
-
-  return { withdrawals, pagination };
-}
-
-function extractWithdrawalFromResponse(
-  data: unknown,
-): WithdrawalRequest | null {
-  const root = (data ?? {}) as Record<string, any>;
-  const candidates = [root, root.data, root.result, root.data?.data];
-
-  for (const candidate of candidates) {
-    if (candidate && typeof candidate === "object") {
-      if (candidate._id) return candidate as WithdrawalRequest;
-      if (candidate.withdrawal && typeof candidate.withdrawal === "object") {
-        return candidate.withdrawal as WithdrawalRequest;
-      }
-    }
-  }
-
-  return null;
-}
-
-const withdrawalFormSchema = z.object({
-  campaign: z.string().min(1, "Campaign is required"),
-  amountRequested: z
-    .number({ message: "Amount is required" })
-    .positive("Amount must be positive"),
-  payoutMethod: z.enum(["bank", "paypal", "crypto"]),
-  reason: z.string().optional(),
-  paypalEmail: z.string().optional(),
-  bankDetails: z
-    .object({
-      accountHolderName: z.string().optional(),
-      bankName: z.string().optional(),
-      accountNumber: z.string().optional(),
-      branchName: z.string().optional(),
-      swiftCode: z.string().optional(),
-    })
-    .optional(),
-  cryptoDetails: z
-    .object({
-      walletAddress: z.string().optional(),
-      network: z.string().optional(),
-    })
-    .optional(),
-});
-
-type WithdrawalFormValues = z.infer<typeof withdrawalFormSchema>;
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", {
@@ -216,23 +88,27 @@ export default function OrganizerWithdrawals() {
   );
   const { createWithdrawalAsync, isCreating } = useOrganizerWithdrawalActions();
 
-  const campaigns = extractCampaignsFromResponse(campaignsQuery.data).filter(
-    (campaign) => !campaign.isClosed,
-  );
+  const campaigns = organizerResponseParsers
+    .extractCampaignsFromResponse(campaignsQuery.data)
+    .filter((campaign: Campaign) => !campaign.isClosed);
   const withdrawalList = useMemo(
     () =>
-      extractWithdrawalListFromResponse(withdrawalsQuery.data, { page, limit }),
+      organizerResponseParsers.extractWithdrawalListFromResponse(
+        withdrawalsQuery.data,
+        { page, limit },
+      ),
     [withdrawalsQuery.data, page, limit],
   );
 
   const withdrawals = withdrawalList.withdrawals;
   const pagination = withdrawalList.pagination;
-  const selectedWithdrawal = extractWithdrawalFromResponse(
-    withdrawalByIdQuery.data,
-  );
+  const selectedWithdrawal =
+    organizerResponseParsers.extractWithdrawalFromResponse(
+      withdrawalByIdQuery.data,
+    );
 
-  const form = useForm<WithdrawalFormValues>({
-    resolver: zodResolver(withdrawalFormSchema),
+  const form = useForm<CreateWithdrawalInput>({
+    resolver: zodResolver(createWithdrawalSchema),
     defaultValues: {
       campaign: "",
       amountRequested: 0,
@@ -285,7 +161,7 @@ export default function OrganizerWithdrawals() {
     }
   }, [withdrawalByIdQuery.isError, withdrawalByIdQuery.error]);
 
-  const onSubmit = async (values: WithdrawalFormValues) => {
+  const onSubmit = async (values: CreateWithdrawalInput) => {
     if (campaigns.length === 0) {
       toast.error(
         "Create at least one active campaign before requesting a withdrawal.",
@@ -322,7 +198,7 @@ export default function OrganizerWithdrawals() {
     };
 
     try {
-      await createWithdrawalAsync(withdrawalFormSchema.parse(payload));
+      await createWithdrawalAsync(createWithdrawalSchema.parse(payload));
       form.reset({
         campaign: "",
         amountRequested: 0,
@@ -382,7 +258,7 @@ export default function OrganizerWithdrawals() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {campaigns.map((campaign) => (
+                          {campaigns.map((campaign: Campaign) => (
                             <SelectItem key={campaign._id} value={campaign._id}>
                               {campaign.title}
                             </SelectItem>
@@ -671,7 +547,7 @@ export default function OrganizerWithdrawals() {
               </p>
             ) : (
               <>
-                {withdrawals.map((withdrawal) => (
+                {withdrawals.map((withdrawal: WithdrawalRequest) => (
                   <div
                     key={withdrawal._id}
                     className="rounded-lg border border-gray-200 p-4 space-y-2"

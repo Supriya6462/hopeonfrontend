@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { organizerResponseParsers } from "@/features/api";
 import {
   Dialog,
   DialogContent,
@@ -38,73 +39,6 @@ import { ROUTES } from "@/routes/routes";
 import type { Campaign, CampaignFilters } from "@/types";
 
 import { useOrganizerCampaignActions, useOrganizerCampaigns } from "../hooks";
-
-interface PaginationMeta {
-  page: number;
-  limit: number;
-  total: number;
-  pages: number;
-}
-
-function extractCampaignListFromResponse(
-  data: unknown,
-  fallback: { page: number; limit: number },
-): { campaigns: Campaign[]; pagination: PaginationMeta } {
-  const root = (data ?? {}) as Record<string, any>;
-  const candidates = [
-    root,
-    root.data,
-    root.result,
-    root.data?.data,
-    root.data?.result,
-  ];
-
-  let campaigns: Campaign[] = [];
-  let pagination: PaginationMeta = {
-    page: fallback.page,
-    limit: fallback.limit,
-    total: 0,
-    pages: 1,
-  };
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      campaigns = candidate as Campaign[];
-      break;
-    }
-    if (Array.isArray(candidate?.campaigns)) {
-      campaigns = candidate.campaigns as Campaign[];
-      break;
-    }
-    if (Array.isArray(candidate?.data?.campaigns)) {
-      campaigns = candidate.data.campaigns as Campaign[];
-      break;
-    }
-  }
-
-  for (const candidate of candidates) {
-    const meta = candidate?.pagination;
-    if (meta && typeof meta === "object") {
-      pagination = {
-        page: Number(meta.page) || fallback.page,
-        limit: Number(meta.limit) || fallback.limit,
-        total: Number(meta.total) || campaigns.length,
-        pages: Number(meta.pages) || 1,
-      };
-      break;
-    }
-  }
-
-  if (pagination.total === 0 && campaigns.length > 0) {
-    pagination = {
-      ...pagination,
-      total: campaigns.length,
-      pages: Math.max(1, Math.ceil(campaigns.length / pagination.limit)),
-    };
-  }
-
-  return { campaigns, pagination };
-}
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", {
@@ -171,11 +105,15 @@ export default function OrganizerCampaigns() {
   }, [campaignsQuery.isError, campaignsQuery.error]);
 
   const campaignList = useMemo(
-    () => extractCampaignListFromResponse(campaignsQuery.data, { page, limit }),
+    () =>
+      organizerResponseParsers.extractCampaignListFromResponse(
+        campaignsQuery.data,
+        { page, limit },
+      ),
     [campaignsQuery.data, page, limit],
   );
 
-  const campaigns = campaignList.campaigns;
+  const campaigns: Campaign[] = campaignList.campaigns;
   const pagination = campaignList.pagination;
 
   const activeCampaigns = useMemo(
