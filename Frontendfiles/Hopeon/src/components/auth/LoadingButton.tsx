@@ -26,7 +26,7 @@ export const LoadingButton = ({
     <Button
       type={type}
       disabled={loading || disabled}
-      className={`w-full h-12 bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 ${className}`}
+      className={`w-full h-12 bg-linear-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 ${className}`}
     >
       {loading ? (
         <>
