@@ -36,6 +36,7 @@ const SUPPORT_LINKS = [
   { name: "My Donations", href: ROUTES.DONOR_DONATIONS },
   { name: "Apply Organizer", href: ROUTES.APPLY_ORGANIZER },
   { name: "Organizer Dashboard", href: ROUTES.ORGANIZER_DASHBOARD },
+  { name: "Notifications", href: ROUTES.NOTIFICATIONS },
 ];
 
 export default function Footer() {
