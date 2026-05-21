@@ -33,8 +33,12 @@ import OrganizerProfile from "@/features/organizer/pages/Profile";
 // Admin Pages
 import AdminDashboard from "@/features/admin/pages/Dashboard";
 import {
+  AdminCampaigns,
+  AdminDonations,
   AdminKycVerification,
   AdminOrganizerManagement,
+  AdminUsers,
+  AdminWithdrawals,
 } from "@/features/admin/pages";
 
 import { ROUTES } from "./routes";
@@ -224,11 +228,11 @@ const routesConfig: RouteObject[] = [
       },
       {
         path: "users",
-        element: <div className="p-4">Users Management - Coming soon</div>,
+        element: <AdminUsers />,
       },
       {
         path: "campaigns",
-        element: <div className="p-4">Campaigns Management - Coming soon</div>,
+        element: <AdminCampaigns />,
       },
       {
         path: "organizers",
@@ -236,13 +240,11 @@ const routesConfig: RouteObject[] = [
       },
       {
         path: "donations",
-        element: <div className="p-4">Donations Management - Coming soon</div>,
+        element: <AdminDonations />,
       },
       {
         path: "withdrawals",
-        element: (
-          <div className="p-4">Withdrawals Management - Coming soon</div>
-        ),
+        element: <AdminWithdrawals />,
       },
       {
         path: "applications",
