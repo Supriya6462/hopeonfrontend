@@ -107,6 +107,13 @@ export function getTopNavItems(
 
   if (!user) return base;
 
+  // Show notifications link for any authenticated user
+  base.push({
+    label: "Notifications",
+    to: ROUTES.NOTIFICATIONS,
+    icon: LayoutDashboard,
+  });
+
   if (user.role === "donor") {
     const donorItems: NavItem[] = [
       ...base,

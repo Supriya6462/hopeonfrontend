@@ -16,9 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { getRoleHomePath, getTopNavItems } from "./roleNavConfig";
 
-const HOPEON_LOGO_URL =
-  "https://ik.imagekit.io/zisapgd2g/ChatGPT_Image_Mar_30__2026__02_44_14_PM-removebg-preview.png";
-
 function linkClass({ isActive }: { isActive: boolean }) {
   return [
     "rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors duration-150",
@@ -78,14 +75,13 @@ export default function TopNav() {
       <div className="mx-auto flex h-16 w-full max-w-screen-2xl items-center justify-between gap-3 px-3 sm:h-18 sm:px-4 lg:h-20 lg:px-8 xl:px-10">
         <Link
           to={getRoleHomePath(user?.role)}
-          className="shrink-0"
+          className="flex items-center gap-2 shrink-0"
           aria-label="HopeOn home"
         >
-          <img
-            src={HOPEON_LOGO_URL}
-            alt="HopeOn logo"
-            className="h-10 w-auto max-w-[132px] object-contain sm:h-11 md:h-12 lg:h-14"
-          />
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground text-sm font-black ring-2 ring-primary/20">
+            H
+          </span>
+          <span className="text-lg font-bold text-foreground">HopeOn</span>
         </Link>
 
         <nav
