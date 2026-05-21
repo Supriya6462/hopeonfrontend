@@ -13,23 +13,27 @@ export const ROUTES = {
   // Public Routes
   HOME: "/",
   HOMEPAGE: "/homepage",
+  ABOUT: "/about",
   ABOUTUS: "/aboutus",
+  DONATE: "/donate",
   CAMPAIGNS: "/campaigns",
+  DONATE_DETAIL: "/donate/:id",
   CAMPAIGN_DETAILS: "/campaigns/:id",
-  ABOUT: "/aboutus",
-  DONATE: "/campaigns",
 
   // Donor Routes (Protected)
+  DASHBOARD: "/dashboard",
+  DONOR_DASHBOARD: "/donor/dashboard",
+  MY_DONATIONS: "/my-donations",
+  DONOR_DONATIONS: "/donor/donations",
+  APPLY_ORGANIZER: "/apply-organizer",
+  DONOR_APPLY_ORGANIZER: "/donor/apply-organizer",
+  APPLICATION_STATUS: "/application-status",
+  DONOR_PROFILE: "/donor/profile",
   DonorHomepage: "/donor/homepage",
   DonorAboutus: "/donor/aboutus",
-  DONOR_DASHBOARD: "/donor/dashboard",
-  DONOR_DONATIONS: "/donor/donations",
-  DONOR_PROFILE: "/donor/profile",
-  APPLY_ORGANIZER: "/donor/apply-organizer",
-  DASHBOARD: "/donor/dashboard",
-  MY_DONATIONS: "/donor/donations",
 
   // Organizer Routes
+  MY_CAMPAIGNS: "/my-campaigns",
   ORGANIZER_DASHBOARD: "/organizer/dashboard",
   ORGANIZER_CAMPAIGNS: "/organizer/campaigns",
   ORGANIZER_CREATE_CAMPAIGN: "/organizer/campaigns/create",
@@ -37,6 +41,13 @@ export const ROUTES = {
   ORGANIZER_CAMPAIGN_INSIGHTS: "/organizer/campaigns/:id/insights",
   ORGANIZER_WITHDRAWALS: "/organizer/withdrawals",
   ORGANIZER_PROFILE: "/organizer/profile",
+  WITHDRAWAL_REQUEST: "/withdrawal-request",
+
+  // Legacy utility pages
+  NOTIFICATIONS: "/notifications",
+  PAYMENT_SUCCESS: "/payment-success",
+  PAYMENT_FAILURE: "/payment-failure",
+  IMAGE_UPLOAD_DEMO: "/image-upload-demo",
 
   // Admin Routes
   ADMIN_DASHBOARD: "/admin/dashboard",

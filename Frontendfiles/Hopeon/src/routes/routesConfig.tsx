@@ -74,11 +74,23 @@ const routesConfig: RouteObject[] = [
         element: <DonorAboutus />,
       },
       {
+        path: "about",
+        element: <DonorAboutus />,
+      },
+      {
         path: "campaigns",
         element: <DonorDonate />,
       },
       {
         path: "campaigns/:id",
+        element: <DonorCampaignDetails />,
+      },
+      {
+        path: "donate",
+        element: <DonorDonate />,
+      },
+      {
+        path: "donate/:id",
         element: <DonorCampaignDetails />,
       },
       // Auth pages inside PublicLayout
@@ -127,6 +139,62 @@ const routesConfig: RouteObject[] = [
 
   // ==================== Donor Routes ====================
   {
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute allowedRoles={["donor"]}>
+        <DonorLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <DonorDashboard />,
+      },
+    ],
+  },
+  {
+    path: "/my-donations",
+    element: (
+      <ProtectedRoute allowedRoles={["donor"]}>
+        <DonorLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <DonorDonations />,
+      },
+    ],
+  },
+  {
+    path: "/apply-organizer",
+    element: (
+      <ProtectedRoute allowedRoles={["donor"]}>
+        <DonorLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <ApplyOrganizer />,
+      },
+    ],
+  },
+  {
+    path: "/application-status",
+    element: (
+      <ProtectedRoute allowedRoles={["donor"]}>
+        <DonorLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <ApplyOrganizer />,
+      },
+    ],
+  },
+  {
     path: "/donor",
     element: (
       <ProtectedRoute allowedRoles={["donor", "organizer"]}>
@@ -163,6 +231,52 @@ const routesConfig: RouteObject[] = [
         element: <ApplyOrganizer />,
       },
     ],
+  },
+
+  // ==================== Legacy Organizer Aliases ====================
+  {
+    path: "/my-campaigns",
+    element: (
+      <ProtectedRoute allowedRoles={["organizer"]}>
+        <OrganizerLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <OrganizerCampaigns />,
+      },
+    ],
+  },
+  {
+    path: "/withdrawal-request",
+    element: (
+      <ProtectedRoute allowedRoles={["organizer"]}>
+        <OrganizerLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <OrganizerWithdrawals />,
+      },
+    ],
+  },
+  {
+    path: "/notifications",
+    element: <Navigate to={ROUTES.DASHBOARD} replace />,
+  },
+  {
+    path: "/payment-success",
+    element: <Navigate to={ROUTES.CAMPAIGNS} replace />,
+  },
+  {
+    path: "/payment-failure",
+    element: <Navigate to={ROUTES.CAMPAIGNS} replace />,
+  },
+  {
+    path: "/image-upload-demo",
+    element: <Navigate to={ROUTES.CAMPAIGNS} replace />,
   },
 
   // ==================== Organizer Routes ====================
