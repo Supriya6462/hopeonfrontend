@@ -8,6 +8,8 @@ import {
   PanelLeftOpen,
   X,
 } from "lucide-react";
+const HOPEON_LOGO_URL =
+  "https://ik.imagekit.io/zisapgd2g/ChatGPT_Image_Mar_30__2026__02_44_14_PM-removebg-preview.png";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -92,11 +94,23 @@ export default function RoleSidebarLayout({
       <div className="flex h-[60px] shrink-0 items-center justify-between border-b border-sidebar-border px-3">
         <Link
           to={getRoleHomePath(role)}
-          className="min-w-0 text-lg font-black text-sidebar-foreground"
+          className="min-w-0 flex items-center gap-2"
           onClick={() => setMobileOpen(false)}
           aria-label="HopeOn home"
         >
-          {collapsed ? "H" : "HopeOn"}
+          <img
+            src={HOPEON_LOGO_URL}
+            alt="HopeOn logo"
+            className={[
+              "object-contain",
+              collapsed ? "h-6 w-auto" : "h-9 w-auto",
+            ].join(" ")}
+          />
+          {!collapsed ? (
+            <span className="text-lg font-black text-sidebar-foreground">
+              HopeOn
+            </span>
+          ) : null}
         </Link>
 
         <button
