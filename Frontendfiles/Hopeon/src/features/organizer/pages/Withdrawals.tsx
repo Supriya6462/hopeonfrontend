@@ -31,6 +31,7 @@ import {
 } from "@/validations/organizer.schema";
 import { organizerResponseParsers } from "@/features/api";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 import {
   useOrganizerCampaigns,
@@ -133,31 +134,28 @@ export default function OrganizerWithdrawals() {
 
   useEffect(() => {
     if (campaignsQuery.isError) {
-      const message =
-        (campaignsQuery.error as any)?.response?.data?.message ||
-        (campaignsQuery.error as any)?.message ||
-        "Failed to load campaigns";
-      toast.error(message);
+      toast.error(
+        getErrorMessage(campaignsQuery.error, "Failed to load campaigns"),
+      );
     }
   }, [campaignsQuery.isError, campaignsQuery.error]);
 
   useEffect(() => {
     if (withdrawalsQuery.isError) {
-      const message =
-        (withdrawalsQuery.error as any)?.response?.data?.message ||
-        (withdrawalsQuery.error as any)?.message ||
-        "Failed to load withdrawals";
-      toast.error(message);
+      toast.error(
+        getErrorMessage(withdrawalsQuery.error, "Failed to load withdrawals"),
+      );
     }
   }, [withdrawalsQuery.isError, withdrawalsQuery.error]);
 
   useEffect(() => {
     if (withdrawalByIdQuery.isError) {
-      const message =
-        (withdrawalByIdQuery.error as any)?.response?.data?.message ||
-        (withdrawalByIdQuery.error as any)?.message ||
-        "Failed to load withdrawal details";
-      toast.error(message);
+      toast.error(
+        getErrorMessage(
+          withdrawalByIdQuery.error,
+          "Failed to load withdrawal details",
+        ),
+      );
     }
   }, [withdrawalByIdQuery.isError, withdrawalByIdQuery.error]);
 

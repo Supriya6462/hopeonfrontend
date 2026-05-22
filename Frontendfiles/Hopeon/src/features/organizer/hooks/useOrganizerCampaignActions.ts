@@ -241,7 +241,7 @@ export const useOrganizerCampaignActions = () => {
         toast.success("Campaign created successfully");
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       const message = getErrorMessage(error, "Failed to create campaign");
       toast.error(message);
     },
@@ -289,32 +289,38 @@ export const useOrganizerCampaignActions = () => {
         );
       }
 
-      queryClient.setQueryData(["organizerCampaign", id], (current: any) => {
-        if (!current || typeof current !== "object") {
-          return current;
-        }
+      queryClient.setQueryData(
+        ["organizerCampaign", id],
+        (current: unknown) => {
+          if (!current || typeof current !== "object") {
+            return current;
+          }
 
-        if (current._id) {
-          return {
-            ...current,
-            isClosed: true,
-            closedReason: closedReason || current.closedReason,
-          };
-        }
+          const curr = current as Record<string, unknown>;
 
-        if (current.data && typeof current.data === "object") {
-          return {
-            ...current,
-            data: {
-              ...current.data,
+          if ("_id" in curr && (curr as any)._id === id) {
+            return {
+              ...curr,
               isClosed: true,
-              closedReason: closedReason || current.data.closedReason,
-            },
-          };
-        }
+              closedReason: closedReason || (curr as any).closedReason,
+            };
+          }
 
-        return current;
-      });
+          if ("data" in curr && curr.data && typeof curr.data === "object") {
+            const dataObj = curr.data as Record<string, unknown>;
+            return {
+              ...curr,
+              data: {
+                ...dataObj,
+                isClosed: true,
+                closedReason: closedReason || (dataObj as any).closedReason,
+              },
+            };
+          }
+
+          return current;
+        },
+      );
 
       return { previousCampaignQueries, previousCampaignById, id };
     },

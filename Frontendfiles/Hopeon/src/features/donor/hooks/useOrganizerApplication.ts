@@ -1,6 +1,7 @@
 import { donorOrganizerAPI } from "@/features/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 interface UseOrganizerApplicationParams {
   onStepChange: (step: number, applicationId: string) => void;
@@ -20,20 +21,33 @@ export function useOrganizerApplication({
 
   const applyMutation = useMutation({
     mutationFn: donorOrganizerAPI.OrganizerApplicationDraft,
-    onSuccess: (response: any) => {
+    onSuccess: (response: unknown) => {
       // Backend returns: { success: true, message: "...", data: { application: { _id: "..." } } }
-      const applicationId = response.data?.application?._id;
+      if (!response || typeof response !== "object") {
+        toast.error("Failed to get application ID from response");
+        return;
+      }
+
+      const resp = response as Record<string, unknown>;
+      const data = resp.data as Record<string, unknown> | undefined;
+      const application = data?.application as
+        | Record<string, unknown>
+        | undefined;
+      const applicationId =
+        typeof application?._id === "string"
+          ? (application._id as string)
+          : undefined;
+
       if (!applicationId) {
         toast.error("Failed to get application ID from response");
         return;
       }
+
       onStepChange(2, applicationId);
       toast.success("✅ Basic info saved! Upload documents to continue.");
     },
-    onError: (err: any) => {
-      toast.error(
-        err.response?.data?.message || "Failed to submit application",
-      );
+    onError: (err: unknown) => {
+      toast.error(getErrorMessage(err, "Failed to submit application"));
     },
   });
 
@@ -46,8 +60,8 @@ export function useOrganizerApplication({
       toast.success("🎉 Application submitted successfully!");
       onSuccessRedirect();
     },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.message || "Failed to upload documents");
+    onError: (err: unknown) => {
+      toast.error(getErrorMessage(err, "Failed to upload documents"));
     },
   });
 

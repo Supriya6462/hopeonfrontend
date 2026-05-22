@@ -15,6 +15,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/routes/routes";
 import { submitApplicationSchema } from "@/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   AlertCircle,
   ArrowLeft,
@@ -28,6 +29,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 import { useOrganizerApplication } from "../hooks/useOrganizerApplication";
 import { buildOrganizerDocuments } from "../hooks/buildOrganizerDocuments";
 import { useLatestOrganizerApplication } from "../hooks/useOrganizerApplicationQueries";
@@ -129,8 +131,20 @@ export default function Applyfororganizer() {
   const shouldShowRejectedStatus = applicationViewState === "rejected";
   const shouldShowForm = applicationViewState === "form";
 
-  // FIXED: Proper typing for form values
-  const onSubmitBasicInfo = (values: any) => {
+  // Properly type the form using the Zod schema
+  const form = useForm<z.infer<typeof submitApplicationSchema>>({
+    resolver: zodResolver(submitApplicationSchema),
+    defaultValues: {
+      organizationName: "",
+      description: "",
+      website: "",
+      contactEmail: user?.email || "",
+      phoneNumber: "",
+      organizationType: "other" as const,
+    },
+  });
+
+  const onSubmitBasicInfo = (values: z.infer<typeof submitApplicationSchema>) => {
     // Convert form data to JSON for draft application
     const applicationData = {
       organizationName: values.organizationName,
@@ -159,7 +173,7 @@ export default function Applyfororganizer() {
         formData,
       });
     } catch (e: any) {
-      toast.error(e.message);
+      toast.error(getErrorMessage(e, "Failed to upload documents"));
     }
   };
 
@@ -186,10 +200,15 @@ export default function Applyfororganizer() {
     );
   }
 
-  if (
-    isApplicationsError &&
-    (applicationsError as any)?.response?.status !== 404
-  ) {
+  if (isApplicationsError) {
+    const status =
+      typeof applicationsError === "object" &&
+      applicationsError &&
+      "response" in applicationsError
+        ? (applicationsError as any).response?.status
+        : undefined;
+
+    if (status !== 404) {
     return (
       <div className="min-h-screen from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center px-4">
         <div className="max-w-lg w-full bg-red-50 border border-red-200 rounded-xl p-5">
@@ -197,8 +216,10 @@ export default function Applyfororganizer() {
             Unable to load your application status
           </h2>
           <p className="text-red-700 text-sm">
-            {(applicationsError as any)?.message ||
-              "Something went wrong while loading your organizer application."}
+            {getErrorMessage(
+              applicationsError,
+              "Something went wrong while loading your organizer application.",
+            )}
           </p>
           <FundraisingButton
             type="button"
@@ -211,6 +232,8 @@ export default function Applyfororganizer() {
         </div>
       </div>
     );
+    }
+  }
   }
 
   // Submit basic application
