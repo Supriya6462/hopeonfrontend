@@ -81,18 +81,7 @@ export default function Applyfororganizer() {
     addressProof: null,
   });
 
-  // Form setup
-  const form = useForm({
-    resolver: zodResolver(submitApplicationSchema),
-    defaultValues: {
-      organizationName: "",
-      description: "",
-      website: "",
-      contactEmail: user?.email || "",
-      phoneNumber: "",
-      organizationType: "other" as const, // FIXED: Type assertion
-    },
-  });
+  // Form setup (typed below)
 
   // FIXED: Proper typing for callbacks
   const { applyMutation, documentMutation } = useOrganizerApplication({
