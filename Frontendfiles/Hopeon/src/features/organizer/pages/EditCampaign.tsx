@@ -70,25 +70,34 @@ type EditCampaignFormValues = z.infer<typeof editCampaignFormSchema>;
 
 function extractCampaignFromResponse(
   data: unknown,
-): Record<string, any> | null {
-  const root = (data ?? {}) as Record<string, unknown>;
-  const candidates = [root, root.data, root.result, root.data?.data];
+): Record<string, unknown> | null {
+  if (!data || typeof data !== "object") return null;
+
+  const root = data as Record<string, unknown>;
+  const candidates: Array<Record<string, unknown> | undefined> = [
+    root,
+    (root as any).data,
+    (root as any).result,
+    (root as any).data?.data,
+  ];
 
   for (const candidate of candidates) {
     if (candidate && typeof candidate === "object") {
-      if (candidate._id || candidate.id || candidate.title) {
-        return candidate as Record<string, any>;
+      if ("_id" in candidate || "id" in candidate || "title" in candidate) {
+        return candidate;
       }
 
-      if (candidate.campaign && typeof candidate.campaign === "object") {
-        return candidate.campaign as Record<string, any>;
+      if (
+        "campaign" in candidate &&
+        candidate.campaign &&
+        typeof (candidate.campaign as unknown) === "object"
+      ) {
+        return candidate.campaign as Record<string, unknown>;
       }
     }
   }
 
   return null;
-  return candidate as Record<string, unknown>;
-  return candidate.campaign as Record<string, unknown>;
 }
 
 export default function EditCampaign() {
