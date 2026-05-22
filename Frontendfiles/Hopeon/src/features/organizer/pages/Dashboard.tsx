@@ -15,6 +15,7 @@ import { organizerResponseParsers } from "@/features/api";
 import { ROUTES } from "@/routes/routes";
 import type { Campaign } from "@/types";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 import { useOrganizerCampaigns, useOrganizerDonationStats } from "../hooks";
 
@@ -44,21 +45,20 @@ export default function OrganizerDashboard() {
 
   useEffect(() => {
     if (campaignsQuery.isError) {
-      const message =
-        (campaignsQuery.error as any)?.response?.data?.message ||
-        (campaignsQuery.error as any)?.message ||
-        "Failed to load campaigns";
-      toast.error(message);
+      toast.error(
+        getErrorMessage(campaignsQuery.error, "Failed to load campaigns"),
+      );
     }
   }, [campaignsQuery.isError, campaignsQuery.error]);
 
   useEffect(() => {
     if (donationStatsQuery.isError) {
-      const message =
-        (donationStatsQuery.error as any)?.response?.data?.message ||
-        (donationStatsQuery.error as any)?.message ||
-        "Failed to load donation stats";
-      toast.error(message);
+      toast.error(
+        getErrorMessage(
+          donationStatsQuery.error,
+          "Failed to load donation stats",
+        ),
+      );
     }
   }, [donationStatsQuery.isError, donationStatsQuery.error]);
 

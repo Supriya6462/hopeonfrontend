@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { donorDonationAPI } from "@/features/api";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 import type { CreateDonationDTO } from "@/types";
 
 export const useDonorDonations = (params?: {
@@ -30,12 +31,8 @@ export const useCreateDonation = () => {
       queryClient.invalidateQueries({ queryKey: ["myDonations"] });
       toast.success("Donation initiated successfully");
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to create donation";
-      toast.error(message);
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to create donation"));
     },
   });
 

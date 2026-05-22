@@ -4,6 +4,7 @@ import { Loader2, ShieldCheck, Upload } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 import { organizerProfileAPI, organizerResponseParsers } from "@/features/api";
 import { Badge } from "@/components/ui/badge";
@@ -108,7 +109,7 @@ export default function OrganizerProfile() {
   );
 
   const verificationStatus = profileState.verificationStatus;
-  const profile = profileState.profile as Record<string, any> | null;
+  const profile = profileState.profile as Record<string, unknown> | null;
   const rejectionReason =
     (profile?.rejectionReason as string | undefined) ?? "";
   const reusableDocumentsCount = Number(
@@ -123,12 +124,8 @@ export default function OrganizerProfile() {
       payload.append("documentType", docType);
       return organizerProfileAPI.uploadProfileDocument(payload);
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to upload document",
-      );
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to upload document"));
     },
   });
 
@@ -176,12 +173,8 @@ export default function OrganizerProfile() {
       toast.success("Organizer profile submitted for verification");
       profileQuery.refetch();
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to save organizer profile",
-      );
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to save organizer profile"));
     },
   });
 
@@ -270,13 +263,14 @@ export default function OrganizerProfile() {
       return;
     }
 
-    const result: any = await uploadMutation.mutateAsync({ file, docType });
+    const result: unknown = await uploadMutation.mutateAsync({ file, docType });
+    const r = result as Record<string, unknown> | undefined;
     setDocuments((prev) => ({
       ...prev,
       [docType]: {
         ...prev[docType],
-        url: result?.url || "",
-        key: result?.key,
+        url: (r?.url as string) || "",
+        key: (r?.key as string) | undefined,
         source: "uploaded",
       },
     }));

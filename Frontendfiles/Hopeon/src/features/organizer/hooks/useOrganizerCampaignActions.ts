@@ -2,13 +2,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { organizerCampaignAPI } from "@/features/api";
 import type { CreateCampaignDTO, UpdateCampaignDTO } from "@/types";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 type CampaignRecord = {
   _id: string;
   isApproved?: boolean;
   isClosed?: boolean;
   closedReason?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 interface UpdateCampaignParams {
@@ -26,7 +27,7 @@ function extractCreatedCampaign(data: unknown): CampaignRecord | null {
     return null;
   }
 
-  const root = data as Record<string, any>;
+  const root = data as Record<string, unknown>;
   const candidates = [
     root,
     root.data,
@@ -50,7 +51,7 @@ function prependCampaignInCache(
   campaign: CampaignRecord,
 ): unknown {
   if (Array.isArray(data)) {
-    const existing = data as any[];
+    const existing = data as unknown[];
     if (existing.some((item) => item?._id === campaign._id)) {
       return data;
     }
@@ -61,7 +62,7 @@ function prependCampaignInCache(
     return data;
   }
 
-  const source = data as Record<string, any>;
+  const source = data as Record<string, unknown>;
 
   if (Array.isArray(source.campaigns)) {
     return {
@@ -107,7 +108,11 @@ function updateCampaignsInCache(
   if (Array.isArray(data)) {
     return data
       .map((item) => {
-        if (!item || typeof item !== "object" || !("_id" in (item as any))) {
+        if (
+          !item ||
+          typeof item !== "object" ||
+          !("_id" in (item as Record<string, unknown>))
+        ) {
           return item;
         }
 
@@ -120,43 +125,61 @@ function updateCampaignsInCache(
     return data;
   }
 
-  const source = data as Record<string, any>;
+  const source = data as Record<string, unknown>;
 
-  if (Array.isArray(source.campaigns)) {
+  if (
+    Array.isArray((source as any).campaigns) ||
+    Array.isArray((source as Record<string, unknown>).campaigns)
+  ) {
     return {
       ...source,
-      campaigns: updateCampaignsInCache(source.campaigns, transform),
+      campaigns: updateCampaignsInCache((source as any).campaigns, transform),
     };
   }
 
-  if (Array.isArray(source.data)) {
+  if (
+    Array.isArray((source as any).data) ||
+    Array.isArray((source as Record<string, unknown>).data)
+  ) {
     return {
       ...source,
-      data: updateCampaignsInCache(source.data, transform),
+      data: updateCampaignsInCache((source as any).data, transform),
     };
   }
 
-  if (source.data && Array.isArray(source.data.campaigns)) {
+  if ((source as any).data && Array.isArray((source as any).data.campaigns)) {
     return {
       ...source,
       data: {
         ...source.data,
-        campaigns: updateCampaignsInCache(source.data.campaigns, transform),
+        campaigns: updateCampaignsInCache(
+          (source as any).data.campaigns,
+          transform,
+        ),
       },
     };
   }
 
-  if (source.result && Array.isArray(source.result.campaigns)) {
+  if (
+    (source as any).result &&
+    Array.isArray((source as any).result.campaigns)
+  ) {
     return {
       ...source,
       result: {
         ...source.result,
-        campaigns: updateCampaignsInCache(source.result.campaigns, transform),
+        campaigns: updateCampaignsInCache(
+          (source as any).result.campaigns,
+          transform,
+        ),
       },
     };
   }
 
-  if (source.data?.data && Array.isArray(source.data.data.campaigns)) {
+  if (
+    (source as any).data?.data &&
+    Array.isArray((source as any).data.data.campaigns)
+  ) {
     return {
       ...source,
       data: {
@@ -164,7 +187,7 @@ function updateCampaignsInCache(
         data: {
           ...source.data.data,
           campaigns: updateCampaignsInCache(
-            source.data.data.campaigns,
+            (source as any).data.data.campaigns,
             transform,
           ),
         },
@@ -219,10 +242,7 @@ export const useOrganizerCampaignActions = () => {
       }
     },
     onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to create campaign";
+      const message = getErrorMessage(error, "Failed to create campaign");
       toast.error(message);
     },
   });
@@ -234,11 +254,8 @@ export const useOrganizerCampaignActions = () => {
       invalidateCampaignQueries(variables.id);
       toast.success("Campaign updated successfully");
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to update campaign";
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error, "Failed to update campaign");
       toast.error(message);
     },
   });
@@ -305,22 +322,19 @@ export const useOrganizerCampaignActions = () => {
       invalidateCampaignQueries(variables.id);
       toast.success("Campaign closed successfully");
     },
-    onError: (error: any, variables, context) => {
-      context?.previousCampaignQueries?.forEach(([key, value]: any) => {
-        queryClient.setQueryData(key, value);
+    onError: (error: unknown, variables, context) => {
+      context?.previousCampaignQueries?.forEach(([key, value]: unknown) => {
+        queryClient.setQueryData(key, value as unknown);
       });
 
       if (context?.previousCampaignById !== undefined) {
         queryClient.setQueryData(
           ["organizerCampaign", variables.id],
-          context.previousCampaignById,
+          context.previousCampaignById as unknown,
         );
       }
 
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to close campaign";
+      const message = getErrorMessage(error, "Failed to close campaign");
       toast.error(message);
     },
   });
@@ -350,15 +364,12 @@ export const useOrganizerCampaignActions = () => {
       invalidateCampaignQueries();
       toast.success("Campaign deleted successfully");
     },
-    onError: (error: any, _variables, context) => {
-      context?.previousCampaignQueries?.forEach(([key, value]: any) => {
-        queryClient.setQueryData(key, value);
+    onError: (error: unknown, _variables, context) => {
+      context?.previousCampaignQueries?.forEach(([key, value]: unknown) => {
+        queryClient.setQueryData(key, value as unknown);
       });
 
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to delete campaign";
+      const message = getErrorMessage(error, "Failed to delete campaign");
       toast.error(message);
     },
   });

@@ -14,13 +14,15 @@ export interface OrganizerDonationStatsData {
   totalDonors?: number;
 }
 
-function asRecord(value: unknown): Record<string, any> {
-  return (value ?? {}) as Record<string, any>;
+function asRecord(value: unknown): Record<string, unknown> {
+  return (value ?? {}) as Record<string, unknown>;
 }
 
-function getCandidates(data: unknown): Record<string, any>[] {
+function getCandidates(data: unknown): Record<string, unknown>[] {
   const root = asRecord(data);
-  return [root, root.data, root.result, root.data?.data].filter(Boolean);
+  return [root, root.data, root.result, root.data?.data].filter(
+    Boolean,
+  ) as Record<string, unknown>[];
 }
 
 export function extractCampaignsFromResponse(data: unknown): Campaign[] {
@@ -183,9 +185,9 @@ export function extractWithdrawalListFromResponse(
 
 export interface OrganizerProfileData {
   verificationStatus: "verified" | "pending" | "rejected" | null;
-  profile: Record<string, any> | null;
-  documentDefaults: Record<string, any>;
-  documentReuseSummary: Record<string, any> | null;
+  profile: Record<string, unknown> | null;
+  documentDefaults: Record<string, unknown>;
+  documentReuseSummary: Record<string, unknown> | null;
 }
 
 export function extractOrganizerProfileFromResponse(

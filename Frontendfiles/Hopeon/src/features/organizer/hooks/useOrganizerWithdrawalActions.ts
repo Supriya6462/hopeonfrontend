@@ -13,12 +13,10 @@ export const useOrganizerWithdrawalActions = () => {
       queryClient.invalidateQueries({ queryKey: ["organizerWithdrawals"] });
       toast.success("Withdrawal request submitted successfully");
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to submit withdrawal request";
-      toast.error(message);
+    onError: (error: unknown) => {
+      toast.error(
+        getErrorMessage(error, "Failed to submit withdrawal request"),
+      );
     },
   });
 

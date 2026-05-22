@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminDonationAPI } from "@/features/api";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 import type { DonationStatus } from "@/enums";
 
 interface UpdateStatusParams {
@@ -18,12 +19,10 @@ export const useAdminDonationActions = () => {
       queryClient.invalidateQueries({ queryKey: ["adminDonations"] });
       toast.success("Donation status updated");
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to update donation status";
-      toast.error(message);
+    onError: (error: unknown) => {
+      toast.error(
+        getErrorMessage(error, "Failed to mark donation as refunded"),
+      );
     },
   });
 

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminOrganizerAPI } from "@/features/api";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 export const useOrganizerActions = () => {
   const queryClient = useQueryClient();
@@ -12,11 +13,8 @@ export const useOrganizerActions = () => {
       queryClient.invalidateQueries({ queryKey: ["organizerlist"] });
       toast.success("Organizer privileges revoked successfully");
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to revoke organizer";
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error, "Failed to revoke organizer");
       toast.error(message);
       console.error("Revoke error:", error);
     },
@@ -28,11 +26,8 @@ export const useOrganizerActions = () => {
       queryClient.invalidateQueries({ queryKey: ["organizerlist"] });
       toast.success("Organizer privileges reinstated successfully");
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to reinstate organizer";
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error, "Failed to reinstate organizer");
       toast.error(message);
       console.error("Reinstate error:", error);
     },

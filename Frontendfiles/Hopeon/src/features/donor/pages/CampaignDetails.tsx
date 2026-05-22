@@ -4,6 +4,7 @@ import { ArrowLeft, Heart, Target, TrendingUp } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +42,7 @@ function extractCampaign(data: unknown): CampaignDetailsRecord | null {
     return null;
   }
 
-  const root = data as Record<string, any>;
+  const root = data as Record<string, unknown>;
   const candidates = [
     root,
     root.data,
@@ -102,11 +103,11 @@ export default function CampaignDetails() {
       queryClient.invalidateQueries({ queryKey: ["publicCampaign", id] });
       queryClient.invalidateQueries({ queryKey: ["publicCampaigns"] });
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Donation failed. Please try again.";
+    onError: (error: unknown) => {
+      const message = getErrorMessage(
+        error,
+        "Donation failed. Please try again.",
+      );
       toast.error(message);
     },
   });
@@ -133,9 +134,10 @@ export default function CampaignDetails() {
         <Alert variant="destructive">
           <AlertTitle>Campaign unavailable</AlertTitle>
           <AlertDescription>
-            {(campaignQuery.error as any)?.response?.data?.message ||
-              (campaignQuery.error as any)?.message ||
-              "This campaign could not be loaded right now."}
+            {getErrorMessage(
+              campaignQuery.error,
+              "This campaign could not be loaded right now.",
+            )}
           </AlertDescription>
         </Alert>
         <Button asChild variant="outline" className="mt-4">

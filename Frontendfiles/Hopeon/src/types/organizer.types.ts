@@ -12,7 +12,7 @@ export interface SubmitApplicationDTO {
   phoneNumber?: string;
   website?: string;
   organizationType?: OrganizationType;
-  documents?: any;
+  documents?: Record<string, unknown> | File | File[] | null;
 }
 
 export interface OrganizerDocuments {

@@ -23,6 +23,7 @@ import {
   CircleOff,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 const currency = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -51,12 +52,8 @@ export default function AdminCampaigns() {
       queryClient.invalidateQueries({ queryKey: ["admin", "campaigns"] });
       toast.success("Campaign approved");
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to approve campaign",
-      );
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to approve campaign"));
     },
   });
 
@@ -72,12 +69,8 @@ export default function AdminCampaigns() {
       queryClient.invalidateQueries({ queryKey: ["admin", "campaigns"] });
       toast.success("Campaign closed");
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to close campaign",
-      );
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to close campaign"));
     },
   });
 
@@ -88,12 +81,8 @@ export default function AdminCampaigns() {
       queryClient.invalidateQueries({ queryKey: ["admin", "campaigns"] });
       toast.success("Campaign deleted");
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to delete campaign",
-      );
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to delete campaign"));
     },
   });
 

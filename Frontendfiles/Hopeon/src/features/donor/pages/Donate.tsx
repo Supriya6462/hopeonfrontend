@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, Search, RefreshCw, CircleAlert } from "lucide-react";
+import { getErrorMessage } from "@/lib/error";
 
 import CampaignCard from "@/components/CampaignCard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -24,7 +25,7 @@ type PublicCampaign = {
 };
 
 function extractCampaigns(data: unknown): PublicCampaign[] {
-  const root = (data ?? {}) as Record<string, any>;
+  const root = (data ?? {}) as Record<string, unknown>;
   const candidates = [
     root,
     root.data,
@@ -140,9 +141,10 @@ export default function Donate() {
           <CircleAlert className="h-4 w-4" />
           <AlertTitle>Could not load campaigns</AlertTitle>
           <AlertDescription>
-            {(campaignsQuery.error as any)?.response?.data?.message ||
-              (campaignsQuery.error as any)?.message ||
-              "Something went wrong while loading campaigns. Please try again."}
+            {getErrorMessage(
+              campaignsQuery.error,
+              "Something went wrong while loading campaigns. Please try again.",
+            )}
           </AlertDescription>
         </Alert>
       ) : filteredCampaigns.length === 0 ? (

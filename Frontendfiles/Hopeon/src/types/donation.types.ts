@@ -19,7 +19,7 @@ export interface UpdateDonationPaymentDetails {
   payerEmail?: string;
   payerName?: string;
   payerCountry?: string;
-  captureDetails?: any;
+  captureDetails?: Record<string, unknown> | null;
   transactionHash?: string;
 }
 
@@ -45,13 +45,13 @@ export interface Donation {
   method: DonationMethod;
   amountInUSD?: number | null;
   exchangeRateUsed?: number | null;
-  platformFee:number;
+  platformFee: number;
   netAmount: number;
   transactionId?: string;
   payerEmail?: string;
   payerName?: string;
   payerCountry?: string;
-  captureDetails?: any;
+  captureDetails?: Record<string, unknown> | null;
   cryptoCurrency?: "ETH" | "USDT" | "BTC";
   transactionHash?: string;
   network?: string;

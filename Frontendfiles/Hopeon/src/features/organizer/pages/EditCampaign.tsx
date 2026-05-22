@@ -71,7 +71,7 @@ type EditCampaignFormValues = z.infer<typeof editCampaignFormSchema>;
 function extractCampaignFromResponse(
   data: unknown,
 ): Record<string, any> | null {
-  const root = (data ?? {}) as Record<string, any>;
+  const root = (data ?? {}) as Record<string, unknown>;
   const candidates = [root, root.data, root.result, root.data?.data];
 
   for (const candidate of candidates) {
@@ -87,6 +87,8 @@ function extractCampaignFromResponse(
   }
 
   return null;
+  return candidate as Record<string, unknown>;
+  return candidate.campaign as Record<string, unknown>;
 }
 
 export default function EditCampaign() {

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminWithdrawalAPI } from "@/features/api";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 interface RejectWithdrawalParams {
   id: string;
@@ -25,12 +26,8 @@ export const useAdminWithdrawalActions = () => {
       invalidate();
       toast.success("Withdrawal request approved");
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to approve withdrawal";
-      toast.error(message);
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to approve withdrawal"));
     },
   });
 
@@ -41,12 +38,8 @@ export const useAdminWithdrawalActions = () => {
       invalidate();
       toast.success("Withdrawal request rejected");
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to reject withdrawal";
-      toast.error(message);
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to reject withdrawal"));
     },
   });
 
@@ -57,12 +50,8 @@ export const useAdminWithdrawalActions = () => {
       invalidate();
       toast.success("Withdrawal marked as paid");
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to mark withdrawal as paid";
-      toast.error(message);
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to mark withdrawal as paid"));
     },
   });
 

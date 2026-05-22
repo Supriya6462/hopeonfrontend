@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -96,11 +97,9 @@ export default function OrganizerCampaigns() {
 
   useEffect(() => {
     if (campaignsQuery.isError) {
-      const message =
-        (campaignsQuery.error as any)?.response?.data?.message ||
-        (campaignsQuery.error as any)?.message ||
-        "Failed to load campaigns";
-      toast.error(message);
+      toast.error(
+        getErrorMessage(campaignsQuery.error, "Failed to load campaigns"),
+      );
     }
   }, [campaignsQuery.isError, campaignsQuery.error]);
 

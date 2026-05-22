@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { ArrowDownCircle, CheckCircle, XCircle, Wallet } from "lucide-react";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 const currency = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -54,12 +55,8 @@ export default function AdminWithdrawals() {
       invalidate();
       toast.success("Withdrawal approved");
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to approve withdrawal",
-      );
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to approve withdrawal"));
     },
   });
 
@@ -70,12 +67,8 @@ export default function AdminWithdrawals() {
       invalidate();
       toast.success("Withdrawal rejected");
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to reject withdrawal",
-      );
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to reject withdrawal"));
     },
   });
 
@@ -86,12 +79,8 @@ export default function AdminWithdrawals() {
       invalidate();
       toast.success("Withdrawal marked as paid");
     },
-    onError: (error: any) => {
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to mark paid",
-      );
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to mark paid"));
     },
   });
 

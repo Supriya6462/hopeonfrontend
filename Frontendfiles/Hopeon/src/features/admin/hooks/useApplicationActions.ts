@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminOrganizerAPI } from "@/features/api";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 interface ApproveApplicationParams {
   id: string;
@@ -24,13 +25,8 @@ export const useApplicationActions = () => {
       queryClient.invalidateQueries({ queryKey: ["organizerlist"] });
       toast.success("Application approved successfully");
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to approve application";
-      toast.error(message);
-      console.error("Approve error:", error);
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to approve application"));
     },
   });
 
@@ -41,13 +37,8 @@ export const useApplicationActions = () => {
       queryClient.invalidateQueries({ queryKey: ["organizerApplications"] });
       toast.success("Application rejected successfully");
     },
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to reject application";
-      toast.error(message);
-      console.error("Reject error:", error);
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, "Failed to reject application"));
     },
   });
 

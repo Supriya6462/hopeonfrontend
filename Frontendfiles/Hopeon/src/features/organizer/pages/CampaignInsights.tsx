@@ -2,6 +2,7 @@ import { ArrowLeft, BarChart3, HandCoins, Users } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,8 +15,8 @@ import {
   useOrganizerCampaignDonations,
 } from "../hooks";
 
-function extractCampaign(data: unknown): Record<string, any> | null {
-  const root = (data ?? {}) as Record<string, any>;
+function extractCampaign(data: unknown): Record<string, unknown> | null {
+  const root = (data ?? {}) as Record<string, unknown>;
   const candidates = [root, root.data, root.result, root.data?.data];
 
   for (const candidate of candidates) {
@@ -30,8 +31,8 @@ function extractCampaign(data: unknown): Record<string, any> | null {
   return null;
 }
 
-function extractStats(data: unknown): Record<string, any> {
-  const root = (data ?? {}) as Record<string, any>;
+function extractStats(data: unknown): Record<string, unknown> {
+  const root = (data ?? {}) as Record<string, unknown>;
   const candidates = [root, root.data, root.result, root.data?.data];
 
   for (const candidate of candidates) {
@@ -50,7 +51,7 @@ function extractStats(data: unknown): Record<string, any> {
 }
 
 function extractDonations(data: unknown): Donation[] {
-  const root = (data ?? {}) as Record<string, any>;
+  const root = (data ?? {}) as Record<string, unknown>;
   const candidates = [root, root.data, root.result, root.data?.data];
 
   for (const candidate of candidates) {
@@ -87,11 +88,9 @@ export default function CampaignInsights() {
 
     queries.forEach((query) => {
       if (query.isError) {
-        const message =
-          (query.error as any)?.response?.data?.message ||
-          (query.error as any)?.message ||
-          "Failed to load campaign insights";
-        toast.error(message);
+        toast.error(
+          getErrorMessage(query.error, "Failed to load campaign insights"),
+        );
       }
     });
   }, [campaignQuery, statsQuery, donationsQuery]);

@@ -28,7 +28,7 @@ export function normalizeApplicationStatus(
 }
 
 export function getApplicationStatus(
-  application: Record<string, any>,
+  application: Record<string, unknown>,
 ): NormalizedApplicationStatus {
   const normalized =
     normalizeApplicationStatus(application?.status) ??
@@ -47,9 +47,9 @@ function pickFirstString(...values: unknown[]): string | undefined {
   return undefined;
 }
 
-export function normalizeOrganizerApplication<T extends Record<string, any>>(
-  application: T,
-): T {
+export function normalizeOrganizerApplication<
+  T extends Record<string, unknown>,
+>(application: T): T {
   const rejectionReason = pickFirstString(
     application?.rejectionReason,
     application?.rejectedReason,
@@ -86,8 +86,8 @@ export function normalizeOrganizerApplication<T extends Record<string, any>>(
 
 export function extractApplicationsFromResponse(
   data: unknown,
-): Record<string, any>[] {
-  const root = (data ?? {}) as Record<string, any>;
+): Record<string, unknown>[] {
+  const root = (data ?? {}) as Record<string, unknown>;
   const candidates = [
     root,
     root.data,
