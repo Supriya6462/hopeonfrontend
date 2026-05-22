@@ -76,9 +76,17 @@ function extractCampaignFromResponse(
   const root = data as Record<string, unknown>;
   const candidates: Array<Record<string, unknown> | undefined> = [
     root,
-    (root as any).data,
-    (root as any).result,
-    (root as any).data?.data,
+    (root as Record<string, unknown>)["data"] as
+      | Record<string, unknown>
+      | undefined,
+    (root as Record<string, unknown>)["result"] as
+      | Record<string, unknown>
+      | undefined,
+    (
+      (root as Record<string, unknown>)["data"] as
+        | Record<string, unknown>
+        | undefined
+    )?.["data"] as Record<string, unknown> | undefined,
   ];
 
   for (const candidate of candidates) {
@@ -119,11 +127,9 @@ export default function EditCampaign() {
 
   useEffect(() => {
     if (campaignQuery.isError) {
-      const message =
-        (campaignQuery.error as any)?.response?.data?.message ||
-        (campaignQuery.error as any)?.message ||
-        "Failed to load campaign";
-      toast.error(message);
+      toast.error(
+        getErrorMessage(campaignQuery.error, "Failed to load campaign"),
+      );
     }
   }, [campaignQuery.isError, campaignQuery.error]);
 

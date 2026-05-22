@@ -57,8 +57,18 @@ export const useGetDraftApplication = () => {
     queryKey: ["myOrganizerDraft"],
     queryFn: () => donorOrganizerAPI.getDraftApplication(),
     // Don't throw on 404 — a null draft is expected for new applicants
-    retry: (failureCount, error: any) => {
-      if (error?.response?.status === 404) return false;
+    retry: (failureCount, error: unknown) => {
+      const errObj = error as Record<string, unknown> | null;
+      const response =
+        errObj && typeof errObj === "object" && "response" in errObj
+          ? (errObj.response as Record<string, unknown> | undefined)
+          : undefined;
+      const status =
+        response && typeof response === "object" && "status" in response
+          ? (response.status as number | undefined)
+          : undefined;
+
+      if (status === 404) return false;
       return failureCount < 2;
     },
   });

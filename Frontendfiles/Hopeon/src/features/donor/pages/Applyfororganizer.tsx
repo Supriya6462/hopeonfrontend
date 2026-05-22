@@ -161,7 +161,7 @@ export default function Applyfororganizer() {
         applicationId,
         formData,
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(getErrorMessage(e, "Failed to upload documents"));
     }
   };

@@ -127,69 +127,92 @@ function updateCampaignsInCache(
 
   const source = data as Record<string, unknown>;
 
-  if (
-    Array.isArray((source as any).campaigns) ||
-    Array.isArray((source as Record<string, unknown>).campaigns)
-  ) {
+  if (Array.isArray((source as Record<string, unknown>)["campaigns"])) {
     return {
       ...source,
-      campaigns: updateCampaignsInCache((source as any).campaigns, transform),
+      campaigns: updateCampaignsInCache(
+        (source as Record<string, unknown>)["campaigns"],
+        transform,
+      ),
+    };
+  }
+
+  if (Array.isArray((source as Record<string, unknown>)["data"])) {
+    return {
+      ...source,
+      data: updateCampaignsInCache(
+        (source as Record<string, unknown>)["data"],
+        transform,
+      ),
     };
   }
 
   if (
-    Array.isArray((source as any).data) ||
-    Array.isArray((source as Record<string, unknown>).data)
+    (source as Record<string, unknown>)["data"] &&
+    Array.isArray(
+      ((source as Record<string, unknown>)["data"] as Record<string, unknown>)[
+        "campaigns"
+      ],
+    )
   ) {
-    return {
-      ...source,
-      data: updateCampaignsInCache((source as any).data, transform),
-    };
-  }
-
-  if ((source as any).data && Array.isArray((source as any).data.campaigns)) {
+    const dataCampaigns = (
+      (source as Record<string, unknown>)["data"] as Record<string, unknown>
+    )["campaigns"];
     return {
       ...source,
       data: {
         ...source.data,
-        campaigns: updateCampaignsInCache(
-          (source as any).data.campaigns,
-          transform,
-        ),
+        campaigns: updateCampaignsInCache(dataCampaigns, transform),
       },
     };
   }
 
   if (
-    (source as any).result &&
-    Array.isArray((source as any).result.campaigns)
+    (source as Record<string, unknown>)["result"] &&
+    Array.isArray(
+      (
+        (source as Record<string, unknown>)["result"] as Record<string, unknown>
+      )["campaigns"],
+    )
   ) {
+    const resultCampaigns = (
+      (source as Record<string, unknown>)["result"] as Record<string, unknown>
+    )["campaigns"];
     return {
       ...source,
       result: {
         ...source.result,
-        campaigns: updateCampaignsInCache(
-          (source as any).result.campaigns,
-          transform,
-        ),
+        campaigns: updateCampaignsInCache(resultCampaigns, transform),
       },
     };
   }
 
   if (
-    (source as any).data?.data &&
-    Array.isArray((source as any).data.data.campaigns)
+    (
+      (source as Record<string, unknown>)["data"] as
+        | Record<string, unknown>
+        | undefined
+    )?.["data"] &&
+    Array.isArray(
+      (
+        (
+          (source as Record<string, unknown>)["data"] as Record<string, unknown>
+        )["data"] as Record<string, unknown>
+      )["campaigns"],
+    )
   ) {
+    const nestedCampaigns = (
+      ((source as Record<string, unknown>)["data"] as Record<string, unknown>)[
+        "data"
+      ] as Record<string, unknown>
+    )["campaigns"];
     return {
       ...source,
       data: {
         ...source.data,
         data: {
           ...source.data.data,
-          campaigns: updateCampaignsInCache(
-            (source as any).data.data.campaigns,
-            transform,
-          ),
+          campaigns: updateCampaignsInCache(nestedCampaigns, transform),
         },
       },
     };
@@ -298,11 +321,16 @@ export const useOrganizerCampaignActions = () => {
 
           const curr = current as Record<string, unknown>;
 
-          if ("_id" in curr && (curr as any)._id === id) {
+          if (
+            "_id" in curr &&
+            typeof curr["_id"] === "string" &&
+            curr["_id"] === id
+          ) {
             return {
               ...curr,
               isClosed: true,
-              closedReason: closedReason || (curr as any).closedReason,
+              closedReason:
+                closedReason || (curr["closedReason"] as string | undefined),
             };
           }
 
@@ -313,7 +341,9 @@ export const useOrganizerCampaignActions = () => {
               data: {
                 ...dataObj,
                 isClosed: true,
-                closedReason: closedReason || (dataObj as any).closedReason,
+                closedReason:
+                  closedReason ||
+                  (dataObj["closedReason"] as string | undefined),
               },
             };
           }
