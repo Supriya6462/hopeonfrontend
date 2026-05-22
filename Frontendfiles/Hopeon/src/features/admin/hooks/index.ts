@@ -1,5 +1,5 @@
-export { usemyapplications } from "./usemyapplications";
-export { useallorganizers } from "./useallorganizers";
+export { useMyApplications } from "./usemyapplications";
+export { useAllOrganizers } from "./useallorganizers";
 export { useApplicationActions } from "./useApplicationActions";
 export { useApplicationFilters } from "./useApplicationFilters";
 export { useOrganizerActions } from "./useOrganizerActions";

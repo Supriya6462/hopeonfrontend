@@ -133,7 +133,11 @@ export default function Applyfororganizer() {
     },
   });
 
-  const onSubmitBasicInfo = (values: z.infer<typeof submitApplicationSchema>) => {
+  const { watch } = form;
+
+  const onSubmitBasicInfo = (
+    values: z.infer<typeof submitApplicationSchema>,
+  ) => {
     // Convert form data to JSON for draft application
     const applicationData = {
       organizationName: values.organizationName,
@@ -198,31 +202,30 @@ export default function Applyfororganizer() {
         : undefined;
 
     if (status !== 404) {
-    return (
-      <div className="min-h-screen from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center px-4">
-        <div className="max-w-lg w-full bg-red-50 border border-red-200 rounded-xl p-5">
-          <h2 className="text-lg font-semibold text-red-900 mb-1">
-            Unable to load your application status
-          </h2>
-          <p className="text-red-700 text-sm">
-            {getErrorMessage(
-              applicationsError,
-              "Something went wrong while loading your organizer application.",
-            )}
-          </p>
-          <FundraisingButton
-            type="button"
-            variant="outline-trust"
-            className="mt-4"
-            onClick={() => window.location.reload()}
-          >
-            Retry
-          </FundraisingButton>
+      return (
+        <div className="min-h-screen from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center px-4">
+          <div className="max-w-lg w-full bg-red-50 border border-red-200 rounded-xl p-5">
+            <h2 className="text-lg font-semibold text-red-900 mb-1">
+              Unable to load your application status
+            </h2>
+            <p className="text-red-700 text-sm">
+              {getErrorMessage(
+                applicationsError,
+                "Something went wrong while loading your organizer application.",
+              )}
+            </p>
+            <FundraisingButton
+              type="button"
+              variant="outline-trust"
+              className="mt-4"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </FundraisingButton>
+          </div>
         </div>
-      </div>
-    );
+      );
     }
-  }
   }
 
   // Submit basic application
@@ -494,38 +497,35 @@ export default function Applyfororganizer() {
                         </p>
                       )}
                       <p className="text-xs text-gray-500 ml-auto">
-                        {form.watch("description")?.length || 0}/1000 characters
+                        {watch("description")?.length || 0}/1000 characters
                       </p>
                     </div>
                   </div>
+                  <div>
+                    <Label htmlFor="contactEmail">Contact Email</Label>
+                    <Input
+                      id="contactEmail"
+                      type="email"
+                      {...form.register("contactEmail")}
+                      placeholder="contact@organization.org"
+                      className="h-11 border-2"
+                    />
+                    {form.formState.errors.contactEmail && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {form.formState.errors.contactEmail.message}
+                      </p>
+                    )}
+                  </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="contactEmail">Contact Email</Label>
-                      <Input
-                        id="contactEmail"
-                        type="email"
-                        {...form.register("contactEmail")}
-                        placeholder="contact@organization.org"
-                        className="h-11 border-2"
-                      />
-                      {form.formState.errors.contactEmail && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {form.formState.errors.contactEmail.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="phoneNumber">Phone Number</Label>
-                      <Input
-                        id="phoneNumber"
-                        type="tel"
-                        {...form.register("phoneNumber")}
-                        placeholder="+1 (555) 123-4567"
-                        className="h-11 border-2"
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="phoneNumber">Phone Number</Label>
+                    <Input
+                      id="phoneNumber"
+                      type="tel"
+                      {...form.register("phoneNumber")}
+                      placeholder="+1 (555) 123-4567"
+                      className="h-11 border-2"
+                    />
                   </div>
 
                   <div>

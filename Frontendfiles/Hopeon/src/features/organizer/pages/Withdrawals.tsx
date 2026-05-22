@@ -130,7 +130,8 @@ export default function OrganizerWithdrawals() {
     },
   });
 
-  const payoutMethod = form.watch("payoutMethod");
+  const { watch } = form;
+  const payoutMethod = watch("payoutMethod");
 
   useEffect(() => {
     if (campaignsQuery.isError) {

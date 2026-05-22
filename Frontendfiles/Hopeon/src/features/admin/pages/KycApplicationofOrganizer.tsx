@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { usemyapplications } from "../hooks/usemyapplications";
+import { useMyApplications } from "../hooks/usemyapplications";
 import { useApplicationActions } from "../hooks/useApplicationActions";
 import { useApplicationFilters } from "../hooks/useApplicationFilters";
 import {
@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { FileSearch, AlertTriangle } from "lucide-react";
 
 export default function KycApplicationofOrganizer() {
-  const { data, isLoading, isError, error } = usemyapplications();
+  const { data, isLoading, isError, error } = useMyApplications();
   const { approveApplication, rejectApplication } = useApplicationActions();
 
   // Modal states

@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ROUTES } from "@/routes/routes";
 import { updateCampaignSchema } from "@/validations";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/error";
 
 import {
   useOrganizerCampaignActions,
@@ -125,6 +126,8 @@ export default function EditCampaign() {
     mode: "onBlur",
   });
 
+  const { reset, watch } = form;
+
   useEffect(() => {
     if (campaignQuery.isError) {
       toast.error(
@@ -137,7 +140,7 @@ export default function EditCampaign() {
     const campaign = extractCampaignFromResponse(campaignQuery.data);
     if (!campaign) return;
 
-    form.reset({
+    reset({
       title: String(campaign.title ?? ""),
       description: String(campaign.description ?? ""),
       target: Number(campaign.target ?? 0),
@@ -145,9 +148,9 @@ export default function EditCampaign() {
         ? campaign.images.join("\n")
         : "",
     });
-  }, [campaignQuery.data, form]);
+  }, [campaignQuery.data, reset]);
 
-  const imagesText = form.watch("imagesText");
+  const imagesText = watch("imagesText");
   const imagesPreviewCount = (imagesText || "")
     .split("\n")
     .map((item) => item.trim())

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useallorganizers } from "../hooks/useallorganizers";
+import { useAllOrganizers } from "../hooks/useallorganizers";
 import { useOrganizerActions } from "../hooks/useOrganizerActions";
 import { useOrganizerFilters } from "../hooks/useOrganizerFilters";
 import {
@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, UserSearch } from "lucide-react";
 
 export default function OrganizerManagement() {
-  const { data, isLoading, isError, error } = useallorganizers();
+  const { data, isLoading, isError, error } = useAllOrganizers();
   const { revokeOrganizer, reinstateOrganizer } = useOrganizerActions();
 
   // Modal states
